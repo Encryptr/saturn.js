@@ -1,5 +1,5 @@
 import RenderObject from './WebGL-RenderObject.js';
-import Matrix4 from './WebGL-matrix.js';
+import { Matrix4 } from './WebGL-matrix.js';
 
 // TODO: .lookAt(x, y, z) method
 
@@ -10,7 +10,9 @@ class PerspectiveCamera extends RenderObject {
   }
   get viewMatrix() {
     // cameraMatrix = modelMatrix
-    return this._modelMatrix.inverse();
+    return new Matrix4(
+      this._modelMatrix.inverse().toFloat32Array()
+    );
   }
   get projectionMatrix() {
     return this._projectionMatrix;
