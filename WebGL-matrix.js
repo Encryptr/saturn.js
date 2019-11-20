@@ -15,7 +15,7 @@ class Matrix4 extends DOMMatrix {
       m14, m24, m34, m44,
     ]);
   }
-	
+    
   /**
    * Inherited Methods:
    * multiplySelf, multiply,
@@ -41,16 +41,15 @@ class Matrix4 extends DOMMatrix {
     return undefined;
   }
   
-	transformVector3(v) {// => Vector3
-		const domPoint = super.transformPoint(v);
-		return new Vector3(
-			domPoint.x,
-			domPoint.y,
-			domPoint.z
+  transformVector3(v) {// => Vector3
+    const domPoint = super.transformPoint(v);
+    return new Vector3(
+      domPoint.x,
+      domPoint.y,	
+      domPoint.z      
     );
-	}
+  }
   
-  // GL Matrix
   static get IDENTITY() { // => Matrix4
     return new Matrix4();
   }
@@ -95,73 +94,73 @@ class Matrix4 extends DOMMatrix {
 }
 
 class Vector3 {
-	constructor(x = 0, y = 0, z = 0) { // => Vector3
-		this._x = x;
-		this._y = y;
-		this._z = z;
-	}
-  set(x, y, z) {
-		this._x = x;
+  constructor(x = 0, y = 0, z = 0) { // => Vector3
+    this._x = x;
     this._y = y;
     this._z = z;
   }
-	get x()	{ // => Number
-		return this._x;
-	}
-	set x(val) { // => Number
-		this._x = val;
-	}
-	get y() { // => Number
-		return this._y;
-	}
-	set y(val) { // => Number
-		this._y = val;
-	}
-	get z() { // => Number
-		return this._z;
-	}
-	set z(val) { // => Number
-		this._z = val;
-	}
-	add(v) { // => Vector3
-		this._x += v.x;
-		this._y += v.y;
-		this._z += v.z;
-		return this;
-	}
-	subtract(v) { // => Vector3
-		this._x -= v.x;
-		this._y -= v.y;
-		this._z -= v.z;
-		return this;
-	}
-	scale(s) { // => Vector3
-		this._x *= s;
-		this._y *= s;
-		this._z *= s;
-		return this;
-	}
-	dot(v) { // => Number
-		const u = this;
-		return (u.x * v.x) + (u.y * v.y) + (u.z * v.z);
-	}
-	cross(v) { // => Vector3
-		const u = this;
-		// TODO: Implement
-	}
-	transform(a) { // => Vector3
-		const v = a.transformVector3(this);
-		this._x = v.x;
-		this._y = v.y;
-		this._z = v.z;
-		return this;
-	}
+  set(x, y, z) {
+    this._x = x;
+    this._y = y;
+    this._z = z;
+  }
+  get x()    { // => Number
+    return this._x;
+  }
+  set x(val) { // => Number
+    this._x = val;
+  }
+  get y() { // => Number
+    return this._y;
+  }
+  set y(val) { // => Number
+    this._y = val;
+  }
+  get z() { // => Number
+    return this._z;
+  }
+  set z(val) { // => Number
+    this._z = val;
+  }
+  add(v) { // => Vector3
+    this._x += v.x;
+    this._y += v.y;
+    this._z += v.z;
+    return this;
+  }
+  subtract(v) { // => Vector3
+    this._x -= v.x;
+    this._y -= v.y;
+    this._z -= v.z;
+    return this;
+  }
+  scale(s) { // => Vector3
+    this._x *= s;
+    this._y *= s;
+    this._z *= s;
+    return this;
+  }
+  dot(v) { // => Number
+    const u = this;
+    return (u.x * v.x) + (u.y * v.y) + (u.z * v.z);
+  }
+  cross(v) { // => Vector3
+    const u = this;
+    // TODO: Implement
+  }
+  transform(a) { // => Vector3
+    const v = a.transformVector3(this);
+    this._x = v.x;
+    this._y = v.y;
+    this._z = v.z;
+    return this;
+  }
   copy() {
     console.log(this._x, this._y, this._z);
     return new Vector3(this._x, this._y, this._z);
   }
   *[Symbol.iterator]() {
-  	yield this.x;
+    yield this.x;
     yield this.y;
     yield this.z;
   }
