@@ -219,10 +219,38 @@ class Vector3 {
     this.y = y;
     this.z = z;
   }
+  copy() {
+    return new Vector3(this.x, this.y, this.z);
+  }
+  get magnitude() {
+    return Math.sqrt(this.x**2 + this.y**2 + this.z**2);
+  }
   set(x, y, z) {
     this.x = x;
     this.y = y;
     this.z = z;
+    return this;
+  }
+  scale(s) {
+    this.x *= s;
+    this.y *= s;
+    this.z *= s;
+    return this;
+  }
+  normalize() {
+    const magnitude = this.magnitude;
+    this.scale(1/magnitude);
+    return this;
+  }
+  transform(matrix) {
+    const a = [this.x, this.y, this.z, 1];
+    const b = matrix.elements;
+    
+    this.x = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+    this.y = a[0] * b[4] + a[1] * b[5] + a[2] * b[6] + a[3] * b[7];
+    this.z = a[0] * b[8] + a[1] * b[9] + a[2] * b[10] + a[3] * b[11];
+    
+    return this;
   }
   *[Symbol.iterator]() {
     yield this.x;

@@ -91,7 +91,7 @@ class RenderObject {
   add(object) {
     if (object.isRenderObject && object.parent !== this) {
       this._children.push(object);
-      object.parent = this; 
+      object.parent = this;
     }
   }
 }
