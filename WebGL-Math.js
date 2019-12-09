@@ -80,7 +80,7 @@ class Matrix4 {
       return inverse;
     }
   }
-  multiply(matrix, mutate = true) {
+  multiply(matrix, {mutate = true} = {}) {
     const target = mutate ? this : this.copy();
     const [a, b, c] = [
       target.elements, 
@@ -107,7 +107,7 @@ class Matrix4 {
     c[13] = a[12] * b[1] + a[13] * b[5] + a[14] * b[9] + a[15] * b[13];
     c[14] = a[12] * b[2] + a[13] * b[6] + a[14] * b[10] + a[15] * b[14];
     c[15] = a[12] * b[3] + a[13] * b[7] + a[14] * b[11] + a[15] * b[15];
-      
+    
     return target;
   }
   scale(s, mutate = true) {
@@ -169,7 +169,7 @@ class Matrix4 {
   }
     
   // extra
-  multiplyMatrices(matrices, mutate = true) {
+  multiplyMatrices(matrices, {mutate = true} = {}) {
     const target = mutate ? this : this.copy();
     const c = target._elements;
     
@@ -190,7 +190,7 @@ class Matrix4 {
       c[9]  = a[8] * b[1] + a[9] * b[5] + a[10] * b[9] + a[11] * b[13];
       c[10] = a[8] * b[2] + a[9] * b[6] + a[10] * b[10] + a[11] * b[14];
       c[11] = a[8] * b[3] + a[9] * b[7] + a[10] * b[11] + a[11] * b[15];
-    
+      
       c[12] = a[12] * b[0] + a[13] * b[4] + a[14] * b[8] + a[15] * b[12];
       c[13] = a[12] * b[1] + a[13] * b[5] + a[14] * b[9] + a[15] * b[13];
       c[14] = a[12] * b[2] + a[13] * b[6] + a[14] * b[10] + a[15] * b[14];
@@ -240,16 +240,6 @@ class Vector3 {
   normalize() {
     const magnitude = this.magnitude;
     this.scale(1/magnitude);
-    return this;
-  }
-  transform(matrix) {
-    const a = [this.x, this.y, this.z, 1];
-    const b = matrix.elements;
-    
-    this.x = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
-    this.y = a[0] * b[4] + a[1] * b[5] + a[2] * b[6] + a[3] * b[7];
-    this.z = a[0] * b[8] + a[1] * b[9] + a[2] * b[10] + a[3] * b[11];
-    
     return this;
   }
   *[Symbol.iterator]() {
