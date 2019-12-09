@@ -48,7 +48,7 @@ class RenderObject {
   // matrices
   updateLocalMatrix() {
     
-  	const rotation    = Matrix4.rotation(...this._rotation);
+    const rotation    = Matrix4.rotation(...this._rotation);
     const translation = Matrix4.translation(...this._position);
     const scale       = Matrix4.scale(this._scale);
     
@@ -61,17 +61,17 @@ class RenderObject {
   }
   updateWorldMatrix() {
     
-  	 if (!this._parent) {
+    if (!this._parent) {
      
-       this._worldMatrix = this._localMatrix.copy();
+      this._worldMatrix = this._localMatrix.copy();
      
-     } else {
+    } else {
      
-       this._worldMatrix = this._parent.worldMatrix.multiply(this._localMatrix, {mutate: false});
+      this._worldMatrix = this._parent.worldMatrix.multiply(this._localMatrix, {mutate: false});
      
-     }
+    }
     
-     this._children.forEach(object => object.updateWorldMatrix());
+    this._children.forEach(object => object.updateWorldMatrix());
     
   }
   get localMatrix() {
