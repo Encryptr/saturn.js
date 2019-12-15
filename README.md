@@ -1,6 +1,9 @@
 # saturn.js
 Small 3D engine built on WebGL 2.0
 
+*Note: all current modules have been deprecated. The engine will be rewritten soon*
+
+
 ## Intended Features:
 * **Renderers**
   - [ ] `ForwardRenderer`
