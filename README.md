@@ -17,10 +17,10 @@ Small 3D engine built on WebGL 2.0
   - [ ] `PhongMaterial`
   
 * **Math Utilities**
-  - [x] `Matrix4`,
-  - [ ] `Vector4`,
-  - [x] `Vector3`,
-  - [ ] `Vector2`,
+  - [x] `Matrix4`
+  - [ ] `Vector4`
+  - [x] `Vector3`
+  - [ ] `Vector2`
   - [ ] `Quaternion` 
 
 * **Lights**
