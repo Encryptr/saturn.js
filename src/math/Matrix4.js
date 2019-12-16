@@ -30,6 +30,12 @@ class Matrix4 {
   clone() {
     return new Matrix4(this.toArray());
   }
+  equals(a, tolerance = 0.01) {
+    const array = a.toArray();
+    return this._elements.every((m, i) => (
+      Math.abs(m - array[i]) <= tolerance
+    ));
+  }
   get determinant() {
     // https://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
     const [
@@ -185,6 +191,30 @@ class Matrix4 {
       Matrix4.makeRotationY(y),
       Matrix4.makeRotationZ(z),
     );
+  }
+  static makeFromAxisAngle(axis, t) {
+    // normalize the axis
+    const u = axis.clone().normalize();
+    const [sin, cos] = [Math.sin(t), Math.cos(t)];
+    return new Matrix4([
+      // column 1
+      cos + u.x ** 2 * (1 - cos),
+      u.y * u.x * (1 - cos) + u.z * sin,
+      u.z * u.x * (1 - cos) - u.y * sin,
+      0,
+      // column 2
+      u.x * u.y * (1 - cos) - u.z * sin,
+      cos + u.y ** 2 * (1 - cos),
+      u.z * u.y * (1 - cos) + u.x * sin,
+      0,
+      // column 3
+      u.x * u.z * (1 - cos) + u.y * sin,
+      u.y * u.z * (1 - cos) - u.x * sin,
+      cos + u.z ** 2 * (1 - cos),
+      0,
+      // column 4
+      0, 0, 0, 1,
+    ]);
   }
   static makeOrthographic(left, right, bottom, top, near, far) {
     return new Matrix4([
