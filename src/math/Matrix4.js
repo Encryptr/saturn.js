@@ -1,10 +1,5 @@
 import { Vector4 } from './Vector4.js';
 
-// utility functions
-const dot = (a, b) => (
-  a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3]
-);
-
 class Matrix4 {
   // note: elements are arranged in column-major order
   // m{row}{column} getters/setters can be used to access individual elements
@@ -110,26 +105,6 @@ class Matrix4 {
   }
   multiply(b) { // => Matrix4
     const a = this.clone();
-    
-    /*this.m00 = dot(a.row0, b.col0);
-    this.m01 = dot(a.row0, b.col1);
-    this.m02 = dot(a.row0, b.col2);
-    this.m03 = dot(a.row0, b.col3);
-    
-    this.m10 = dot(a.row1, b.col0);
-    this.m11 = dot(a.row1, b.col1);
-    this.m12 = dot(a.row1, b.col2);
-    this.m13 = dot(a.row1, b.col3);
-    
-    this.m20 = dot(a.row2, b.col0);
-    this.m21 = dot(a.row2, b.col1);
-    this.m22 = dot(a.row2, b.col2);
-    this.m23 = dot(a.row2, b.col3);
-    
-    this.m30 = dot(a.row3, b.col0);
-    this.m31 = dot(a.row3, b.col1);
-    this.m32 = dot(a.row3, b.col2);
-    this.m33 = dot(a.row3, b.col3);*/
     
     this.m00 = a.row0.dot(b.col0);
     this.m01 = a.row0.dot(b.col1);
