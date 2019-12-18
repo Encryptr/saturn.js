@@ -18,7 +18,7 @@ Small 3D engine built on WebGL 2.0
   
 * **Math Utilities**
   - [x] `Matrix4`
-  - [ ] `Vector4`
+  - [x] `Vector4`
   - [x] `Vector3`
   - [ ] `Vector2`
   - [ ] `Quaternion` 
