@@ -1,3 +1,4 @@
+import { Vector3 } from './Vector3.js';
 import { Vector4 } from './Vector4.js';
 
 class Matrix4 {
@@ -11,49 +12,58 @@ class Matrix4 {
   ]) { // => Matrix4
     this._elements = array.slice(0, 16);
   }
+  
   get isMatrix4() { // => boolean
     return true;
   }
+  
   toArray() { // => Array
     return [...this._elements];
   }
+  
   toFloat32Array() { // => Float32Array
     return new Float32Array(this._elements);
   }
+  
   copy(a) { // => Matrix4
     this._elements = a.toArray();
     return this;
   }
+  
   clone() { // => Matrix4
     return new Matrix4(this.toArray());
   }
+  
   set(array) {
     this._elements = array.slice(0, 16);
   }
+  
   equals(a, tolerance = 0.001) { // => boolean
     const array = a.toArray();
     return this._elements.every((m, i) => (
       Math.abs(m - array[i]) < tolerance
     ));
   }
+  
   get determinant() { // => number
     // https://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
     const [
-      m00, m10, m20, m30,
-      m01, m11, m21, m31,
-      m02, m12, m22, m32,
-      m03, m13, m23, m33,
+      m11, m21, m31, m41,
+      m12, m22, m32, m42,
+      m13, m23, m33, m43,
+      m14, m24, m34, m44,
     ] = this._elements;
     
     return (
-      m03*m12*m21*m30 - m02*m13*m21*m30 - m03*m11*m22*m30 + m01*m13*m22*m30 +
-      m02*m11*m23*m30 - m01*m12*m23*m30 - m03*m12*m20*m31 + m02*m13*m20*m31 +
-      m03*m10*m22*m31 - m00*m13*m22*m31 - m02*m10*m23*m31 + m00*m12*m23*m31 +
-      m03*m11*m20*m32 - m01*m13*m20*m32 - m03*m10*m21*m32 + m00*m13*m21*m32 +
-      m01*m10*m23*m32 - m00*m11*m23*m32 - m02*m11*m20*m33 + m01*m12*m20*m33 +
-      m02*m10*m21*m33 - m00*m12*m21*m33 - m01*m10*m22*m33 + m00*m11*m22*m33
+      m14*m23*m32*m41 - m13*m24*m32*m41 - m14*m22*m33*m41 + m12*m24*m33*m41 +
+      m13*m22*m34*m41 - m12*m23*m34*m41 - m14*m23*m31*m42 + m13*m24*m31*m42 +
+      m14*m21*m33*m42 - m11*m24*m33*m42 - m13*m21*m34*m42 + m11*m23*m34*m42 +
+      m14*m22*m31*m43 - m12*m24*m31*m43 - m14*m21*m32*m43 + m11*m24*m32*m43 +
+      m12*m21*m34*m43 - m11*m22*m34*m43 - m13*m22*m31*m44 + m12*m23*m31*m44 +
+      m13*m21*m32*m44 - m11*m23*m32*m44 - m12*m21*m33*m44 + m11*m22*m33*m44
     );
   }
+  
   get inverse() { // => Matrix4 or undefined
     // https://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
     const determinant = this.determinant;
@@ -61,142 +71,161 @@ class Matrix4 {
       return undefined;
     } else {
       const [
-        m00, m10, m20, m30,
-        m01, m11, m21, m31,
-        m02, m12, m22, m32,
-        m03, m13, m23, m33,
+        m11, m21, m31, m41,
+        m12, m22, m32, m42,
+        m13, m23, m33, m43,
+        m14, m24, m34, m44,
       ] = this._elements;
       const inverse = new Matrix4();
       
-      inverse.m00 = m12*m23*m31 - m13*m22*m31 + m13*m21*m32 - m11*m23*m32 - m12*m21*m33 + m11*m22*m33;
-      inverse.m01 = m03*m22*m31 - m02*m23*m31 - m03*m21*m32 + m01*m23*m32 + m02*m21*m33 - m01*m22*m33;
-      inverse.m02 = m02*m13*m31 - m03*m12*m31 + m03*m11*m32 - m01*m13*m32 - m02*m11*m33 + m01*m12*m33;
-      inverse.m03 = m03*m12*m21 - m02*m13*m21 - m03*m11*m22 + m01*m13*m22 + m02*m11*m23 - m01*m12*m23;
+      inverse.m11 = m23*m34*m42 - m24*m33*m42 + m24*m32*m43 - m22*m34*m43 - m23*m32*m44 + m22*m33*m44;
+      inverse.m12 = m14*m33*m42 - m13*m34*m42 - m14*m32*m43 + m12*m34*m43 + m13*m32*m44 - m12*m33*m44;
+      inverse.m13 = m13*m24*m42 - m14*m23*m42 + m14*m22*m43 - m12*m24*m43 - m13*m22*m44 + m12*m23*m44;
+      inverse.m14 = m14*m23*m32 - m13*m24*m32 - m14*m22*m33 + m12*m24*m33 + m13*m22*m34 - m12*m23*m34;
       
-      inverse.m10 = m13*m22*m30 - m12*m23*m30 - m13*m20*m32 + m10*m23*m32 + m12*m20*m33 - m10*m22*m33;
-      inverse.m11 = m02*m23*m30 - m03*m22*m30 + m03*m20*m32 - m00*m23*m32 - m02*m20*m33 + m00*m22*m33;
-      inverse.m12 = m03*m12*m30 - m02*m13*m30 - m03*m10*m32 + m00*m13*m32 + m02*m10*m33 - m00*m12*m33;
-      inverse.m13 = m02*m13*m20 - m03*m12*m20 + m03*m10*m22 - m00*m13*m22 - m02*m10*m23 + m00*m12*m23;
+      inverse.m21 = m24*m33*m41 - m23*m34*m41 - m24*m31*m43 + m21*m34*m43 + m23*m31*m44 - m21*m33*m44;
+      inverse.m22 = m13*m34*m41 - m14*m33*m41 + m14*m31*m43 - m11*m34*m43 - m13*m31*m44 + m11*m33*m44;
+      inverse.m23 = m14*m23*m41 - m13*m24*m41 - m14*m21*m43 + m11*m24*m43 + m13*m21*m44 - m11*m23*m44;
+      inverse.m24 = m13*m24*m31 - m14*m23*m31 + m14*m21*m33 - m11*m24*m33 - m13*m21*m34 + m11*m23*m34;
       
-      inverse.m20 = m11*m23*m30 - m13*m21*m30 + m13*m20*m31 - m10*m23*m31 - m11*m20*m33 + m10*m21*m33;
-      inverse.m21 = m03*m21*m30 - m01*m23*m30 - m03*m20*m31 + m00*m23*m31 + m01*m20*m33 - m00*m21*m33;
-      inverse.m22 = m01*m13*m30 - m03*m11*m30 + m03*m10*m31 - m00*m13*m31 - m01*m10*m33 + m00*m11*m33;
-      inverse.m23 = m03*m11*m20 - m01*m13*m20 - m03*m10*m21 + m00*m13*m21 + m01*m10*m23 - m00*m11*m23;
+      inverse.m31 = m22*m34*m41 - m24*m32*m41 + m24*m31*m42 - m21*m34*m42 - m22*m31*m44 + m21*m32*m44;
+      inverse.m32 = m14*m32*m41 - m12*m34*m41 - m14*m31*m42 + m11*m34*m42 + m12*m31*m44 - m11*m32*m44;
+      inverse.m33 = m12*m24*m41 - m14*m22*m41 + m14*m21*m42 - m11*m24*m42 - m12*m21*m44 + m11*m22*m44;
+      inverse.m34 = m14*m22*m31 - m12*m24*m31 - m14*m21*m32 + m11*m24*m32 + m12*m21*m34 - m11*m22*m34;
       
-      inverse.m30 = m12*m21*m30 - m11*m22*m30 - m12*m20*m31 + m10*m22*m31 + m11*m20*m32 - m10*m21*m32;
-      inverse.m31 = m01*m22*m30 - m02*m21*m30 + m02*m20*m31 - m00*m22*m31 - m01*m20*m32 + m00*m21*m32;
-      inverse.m32 = m02*m11*m30 - m01*m12*m30 - m02*m10*m31 + m00*m12*m31 + m01*m10*m32 - m00*m11*m32;
-      inverse.m33 = m01*m12*m20 - m02*m11*m20 + m02*m10*m21 - m00*m12*m21 - m01*m10*m22 + m00*m11*m22;
+      inverse.m41 = m23*m32*m41 - m22*m33*m41 - m23*m31*m42 + m21*m33*m42 + m22*m31*m43 - m21*m32*m43;
+      inverse.m42 = m12*m33*m41 - m13*m32*m41 + m13*m31*m42 - m11*m33*m42 - m12*m31*m43 + m11*m32*m43;
+      inverse.m43 = m13*m22*m41 - m12*m23*m41 - m13*m21*m42 + m11*m23*m42 + m12*m21*m43 - m11*m22*m43;
+      inverse.m44 = m12*m23*m31 - m13*m22*m31 + m13*m21*m32 - m11*m23*m32 - m12*m21*m33 + m11*m22*m33;
       
       return inverse.scale(1/determinant);
     }
   }
+  
   get transpose() { // => Matrix4
     return new Matrix4([
-      this.m00, this.m01, this.m02, this.m03,
-      this.m10, this.m11, this.m12, this.m13,
-      this.m20, this.m21, this.m22, this.m23,
-      this.m30, this.m31, this.m32, this.m33,
+      this.m11, this.m12, this.m13, this.m14,
+      this.m21, this.m22, this.m23, this.m24,
+      this.m31, this.m32, this.m33, this.m34,
+      this.m41, this.m42, this.m43, this.m44,
     ]);
   }
+  
   invert() { // => Matrix4
     this._elements = this.inverse.toArray();
     return this;
   }
-  multiply(b) { // => Matrix4
+  
+  _multiply(b) { // => Matrix4
     const a = this.clone();
     
-    this.m00 = a.row0.dot(b.col0);
-    this.m01 = a.row0.dot(b.col1);
-    this.m02 = a.row0.dot(b.col2);
-    this.m03 = a.row0.dot(b.col3);
-    
-    this.m10 = a.row1.dot(b.col0);
     this.m11 = a.row1.dot(b.col1);
     this.m12 = a.row1.dot(b.col2);
     this.m13 = a.row1.dot(b.col3);
+    this.m14 = a.row1.dot(b.col4);
     
-    this.m20 = a.row2.dot(b.col0);
     this.m21 = a.row2.dot(b.col1);
     this.m22 = a.row2.dot(b.col2);
     this.m23 = a.row2.dot(b.col3);
+    this.m24 = a.row2.dot(b.col4);
     
-    this.m30 = a.row3.dot(b.col0);
     this.m31 = a.row3.dot(b.col1);
     this.m32 = a.row3.dot(b.col2);
     this.m33 = a.row3.dot(b.col3);
+    this.m34 = a.row3.dot(b.col4);
+    
+    this.m41 = a.row4.dot(b.col1);
+    this.m42 = a.row4.dot(b.col2);
+    this.m43 = a.row4.dot(b.col3);
+    this.m44 = a.row4.dot(b.col4);
     
     return this;
   }
-  multiplyMatrices(...matrices) { // => Matrix4
-    matrices.forEach(a => this.multiply(a));
+  
+  multiply(...matrices) { // => Matrix4
+    matrices.forEach(a => this._multiply(a));
     return this;
   }
+  
   scale(scalar) { // => Matrix4
     this._elements = this._elements.map(e => e * scalar);
     return this;
   }
-  static multiply(a, b) { // => Matrix4
-    return a.clone().multiply(b);
+  
+  makeIdentity() {
+    this._elements = [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1,
+    ];
+    return this;
   }
-  static multiplyMatrices(...matrices) { // => Matrix4
-    return new Matrix4().multiplyMatrices(...matrices);
-  }
-  static scale(a, scalar) { // => Matrix4
-    return a.clone().scale(scalar);
-  }
-  static makeScale(x, y, z) { // => Matrix4
-    return new Matrix4([
+  
+  makeScale(x, y, z) { // => Matrix4
+    this._elements = [
       x, 0, 0, 0,
       0, y, 0, 0,
       0, 0, z, 0,
       0, 0, 0, 1,
-    ]);
+    ];
+    return this;
   }
-  static makeTranslation(x, y, z) { // => Matrix4
-    return new Matrix4([
+  
+  makeTranslation(x, y, z) { // => Matrix4
+    this._elements = [
       1, 0, 0, 0,
       0, 1, 0, 0,
       0, 0, 1, 0,
       x, y, z, 1,
-    ]);
+    ];
+    return this;
   }
-  static makeRotationX(t) { // => Matrix4
-    return new Matrix4([
+  
+  makeRotationX(t) { // => Matrix4
+    this._elements = [
       1,            0,           0, 0,
       0,  Math.cos(t), Math.sin(t), 0,
       0, -Math.sin(t), Math.cos(t), 0,
       0,            0,           0, 1,
-    ]);
+    ];
+    return this;
   }
-  static makeRotationY(t) { // => Matrix4
-    return new Matrix4([
+  
+  makeRotationY(t) { // => Matrix4
+    this._elements = [
       Math.cos(t), 0, -Math.sin(t), 0,
                 0, 1,            0, 0,
       Math.sin(t), 0,  Math.cos(t), 0,
                 0, 0,            0, 1,
-    ]);
+    ];
+    return this;
   }
-  static makeRotationZ(t) { // => Matrix4
-    return new Matrix4([
+  
+  makeRotationZ(t) { // => Matrix4
+    this._elements = [
        Math.cos(t), Math.sin(t), 0, 0,
       -Math.sin(t), Math.cos(t), 0, 0,
                 0,            0, 1, 0,
                 0,            0, 0, 1,
-    ]);
+    ];
+    return this;
   }
-  static makeRotation(x, y, z) { // => Matrix4
-    return Matrix4.multiplyMatrices(
-      Matrix4.makeRotationX(x),
-      Matrix4.makeRotationY(y),
-      Matrix4.makeRotationZ(z),
+  
+  makeRotation(x, y, z) { // => Matrix4
+    this.makeIdentity().multiply(
+      new Matrix4().makeRotationX(x),
+      new Matrix4().makeRotationY(y),
+      new Matrix4().makeRotationZ(z),
     );
+    return this;
   }
-  static makeFromAxisAngle(axis, t) { // => Matrix4
+  
+  makeFromAxisAngle(axis, t) { // => Matrix4
     // normalize the axis
     const u = axis.clone().normalize();
     const [sin, cos] = [Math.sin(t), Math.cos(t)];
-    return new Matrix4([
+    this._elements = [
       // column 1
       cos + u.x ** 2 * (1 - cos),
       u.y * u.x * (1 - cos) + u.z * sin,
@@ -214,10 +243,12 @@ class Matrix4 {
       0,
       // column 4
       0, 0, 0, 1,
-    ]);
+    ];
+    return this;
   }
-  static makeOrthographic(left, right, bottom, top, near, far) { // => Matrix4
-    return new Matrix4([
+  
+  makeOrthographic(left, right, bottom, top, near, far) { // => Matrix4
+    this._elements = [
       2 / (right - left), 0, 0, 0,
       0, 2 / (top - bottom), 0, 0,
       0, 0, 2 / (near - far), 0, 0,
@@ -226,21 +257,31 @@ class Matrix4 {
       (bottom + top) / (bottom - top),
       (near + far) / (near - far),
       1,
-    ]);
+    ];
+    return this;
   }
-  static makePerspective(fov, aspect, near, far) { // => Matrix4
+  
+  makePerspective(fov, aspect, near, far) { // => Matrix4
     const f = Math.tan(Math.PI * 0.5 - 0.5* fov);
     const rangeInv = 1 / (near - far);
     
-    return new Matrix4([
+    this._elements = [
       f / aspect, 0, 0, 0,
       0, f, 0, 0,
       0, 0, (near + far) * rangeInv, -1,
       0, 0, near * far * rangeInv * 2, 0,
-    ]);
+    ];
+    return this;
   }
+  
   static get IDENTITY() { // => Matrix4
     return new Matrix4();
+  }
+  
+  *[Symbol.iterator]() {
+    for (let i = 0; i < 16; i++) {
+      yield this._elements[i];
+    }
   }
 }
 
@@ -249,7 +290,7 @@ for (let i = 0; i < 4; i++) {
   Object.defineProperties(
     Matrix4.prototype,
     {
-      [`col${i}`]: {
+      [`col${i+1}`]: {
         get() { // => Vector4
           return new Vector4(
             ...this._elements.slice(i*4, i*4+4)
@@ -259,7 +300,7 @@ for (let i = 0; i < 4; i++) {
           this._elements.splice(i*4, 4, ...vector.toArray());
         },
       },
-      [`row${i}`]: {
+      [`row${i+1}`]: {
         get() { // => Vector4
           return new Vector4(
             this._elements[i],
@@ -282,7 +323,7 @@ for (let i = 0; i < 4; i++) {
     // j => row, i => column
     Object.defineProperty(
       Matrix4.prototype,
-      `m${j}${i}`,
+      `m${j+1}${i+1}`,
       {
         get() { // => number
           return this._elements[i * 4 + j];

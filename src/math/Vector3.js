@@ -63,24 +63,24 @@ class Vector3 {
       (Math.abs(this._z - v.z) < tolerance)
     );
   }
-  add(v) { // => Vector3
+  _add(v) { // => Vector3
     this._x += v.x;
     this._y += v.y;
     this._z += v.z;
     return this;
   }
-  subtract(v) { // => Vector3
+  _sub(v) { // => Vector3
     this._x -= v.x;
     this._y -= v.y;
     this._z -= v.z;
     return this;
   }
-  addVectors(...vectors) { // => Vector3
-    vectors.forEach(v => this.add(v));
+  add(...vectors) { // => Vector3
+    vectors.forEach(v => this._add(v));
     return this;
   }
-  subtractVectors(...vectors) { // => Vector3
-    vectors.forEach(v => this.subtract(v));
+  sub(...vectors) { // => Vector3
+    vectors.forEach(v => this._sub(v));
     return this;
   }
   scale(s) { // => Vector3
@@ -122,15 +122,6 @@ class Vector3 {
     this.y = _v4.y / _v4.w;
     this.z = _v4.z / _v4.w;
     return this;
-  }
-  static get X_AXIS() {
-    return new Vector3(1, 0, 0);
-  }
-  static get Y_AXIS() {
-    return new Vector3(0, 1, 0);
-  }
-  static get Z_AXIS() {
-    return new Vector3(0, 0, 1);
   }
   *[Symbol.iterator]() {
     yield this._x;
