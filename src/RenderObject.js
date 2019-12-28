@@ -1,10 +1,10 @@
 import { Vector3 } from './math/Vector3.js';
 import { Matrix4 } from './math/Matrix4.js';
 
-const _makeVectorHandler = (o) => ({
+const _makeVectorHandler = (object) => ({
   set(vector, component, value) {
     Reflect.set(vector, component, value);
-    o.computeMatrices();
+    object.computeMatrices();
     return true;
   },
 });
@@ -38,20 +38,32 @@ class RenderObject {
   get position() {
     return this._position;
   }
-  set position(v) {
-    this._position.copy(v);
+  set position(vector) {
+    if (vector.isVector3) {
+      this._position.copy(vector);
+    } else {
+      console.warn('RenderObject.js: (.set position) expected vector to be of type SATURN.Vector3.');
+    }
   }
   get rotation() {
     return this._rotation;
   }
-  set rotation(v) {
-    this._rotation.copy(v);
+  set rotation(vector) {
+    if (vector.isVector3) {
+      this._rotation.copy(vector);
+    } else {
+      console.warn('RenderObject.js: (.set rotation) expected vector to be of type SATURN.Vector3.');
+    }
   }
   get scale() {
     return this._scale;
   }
-  set scale(v) {
-    this._scale.copy(v);
+  set scale(vector) {
+    if (vector.isVector3) {
+      this._scale.copy(vector);
+    } else {
+      console.warn('RenderObject.js: (.set scale) expected vector to be of type SATURN.Vector3.');
+    }
   }
   get localMatrix() {
     return this._localMatrix;
@@ -87,6 +99,13 @@ class RenderObject {
   get parent() {
     return this._parent;
   }
+  set parent(object) {
+    if (object.isRenderObject) {
+      this._parent = object;
+    } else {
+      console.warn('RenderObject.js: (.set parent) expected object to be of type SATURN.RenderObject.');
+    }
+  }
   get children() {
     return [...this._children];
   }
@@ -102,28 +121,32 @@ class RenderObject {
       return objects;
     }(this._children));
   }
-  add(o) {
-    if (o.isRenderObject) {
-      if (o.parent)
-        o.parent.remove(o);
-      this._children.push(o);
-      o._parent = this;
+  add(object) {
+    if (object.isRenderObject) {
+      if (object.parent)
+        object.parent.remove(object);
+      this._children.push(object);
+      object.parent = this;
+      object.computeWorldMatrix();
       return this;
+    } else {
+      console.warn('RenderObject.js: (.add) expected object to be of type SATURN.RenderObject.');
     }
   }
   remove(o) {
-    const index = this._children.indexOf(o);
+    const index = this._children.indexOf(object);
     if (index !== -1) {
       this._children.splice(index, 1);
-      o._parent = null;
+      object.parent = null;
+      object.computeWorldMatrix();
     }
     return this;
   }
-  traverseChildren(f) {
-    this._children.forEach(f);
+  traverseChildren(callback) {
+    this._children.forEach(callback);
   }
-  traverseAncestors(f) {
-    this.ancestors.forEach(f);
+  traverseAncestors(callback) {
+    this.ancestors.forEach(callback);
   }
 }
 

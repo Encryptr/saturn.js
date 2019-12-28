@@ -5,15 +5,13 @@ export { RenderObject } from './RenderObject.js';
 export { Scene } from './Scene.js';
 export { Attribute } from './Attribute.js';
 export { Geometry } from './Geometry.js';
-export { ShaderMaterial } from './ShaderMaterial.js';
 export { Renderer } from './Renderer.js';
-export { Camera, PerspectiveCamera } from './Camera.js';
+export * from './Camera.js';
 export { Mesh } from './Mesh.js';
-
-// constants
-export const POSITION = 0;
-export const NORMAL = 1;
-export const UV = 2;
-export const MODEL = 'u_model';
-export const VIEW = 'u_view';
-export const PROJECTION = 'u_projection';
+export { Color } from './Color.js';
+export { Fog } from './Fog.js';
+export { TextureLoader } from './TextureLoader.js';
+export { Texture } from './Texture.js';
+export { default as CORE_VERTEX } from './CORE_VERTEX.glsl.js'
+export { default as CORE_FRAGMENT } from './CORE_FRAGMENT.glsl.js'
+export * from './Material.js';

@@ -12,14 +12,22 @@ class Mesh extends RenderObject {
   get geometry() {
     return this._geometry;
   }
-  set geometry(g) {
-    this._geometry = g;
+  set geometry(geometry) {
+    if (geometry.isGeometry) {
+      this._geometry = geometry;
+    } else {
+      console.warn('Mesh.js: (.set geometry) expected geometry to be of type SATURN.Geometry.');
+    }
   }
   get material() {
     return this._material;
   }
-  set material(m) {
-    this._material = m;
+  set material(material) {
+    if (material.isMaterial) {
+      this._material = material;
+    } else {
+      console.warn('Mesh.js: (.set material) expected material to be of type SATURN.Material.');
+    }
   }
 }
 
