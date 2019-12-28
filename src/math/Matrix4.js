@@ -25,8 +25,12 @@ class Matrix4 {
     return new Float32Array(this._elements);
   }
   
-  copy(a) { // => Matrix4
-    this._elements = a.toArray();
+  copy(matrix) {
+    if (matrix.isMatrix4) {
+      this._elements = matrix.toArray();
+    } else {
+      console.warn('Matrix4.js: (.copy) expected matrix to be of type SATURN.Matrix4.');
+    }
     return this;
   }
   
@@ -35,14 +39,24 @@ class Matrix4 {
   }
   
   set(array) {
-    this._elements = array.slice(0, 16);
+    if (Array.isArray(array)) {
+      this._elements = array.slice(0, 16);
+    } else {
+      console.warn('Matrix4.js: (.set) expected array to be of type Array.');
+    }
+    return this;
   }
   
-  equals(a, tolerance = 0.001) { // => boolean
-    const array = a.toArray();
-    return this._elements.every((m, i) => (
-      Math.abs(m - array[i]) < tolerance
-    ));
+  equals(matrix, tolerance = 0.001) { // => boolean
+    if (matrix.isMatrix4) {
+      const array = matrix.toArray();
+      return this._elements.every((m, i) => (
+        Math.abs(m - array[i]) < tolerance
+      ));
+    } else {
+      console.warn('Matrix4.js: (.equals) expected matrix to be of type SATURN.Matrix4.');
+      return false;
+    }
   }
   
   get determinant() { // => number
@@ -117,33 +131,40 @@ class Matrix4 {
   }
   
   _multiply(b) { // => Matrix4
-    const a = this.clone();
-    
-    this.m11 = a.row1.dot(b.col1);
-    this.m12 = a.row1.dot(b.col2);
-    this.m13 = a.row1.dot(b.col3);
-    this.m14 = a.row1.dot(b.col4);
-    
-    this.m21 = a.row2.dot(b.col1);
-    this.m22 = a.row2.dot(b.col2);
-    this.m23 = a.row2.dot(b.col3);
-    this.m24 = a.row2.dot(b.col4);
-    
-    this.m31 = a.row3.dot(b.col1);
-    this.m32 = a.row3.dot(b.col2);
-    this.m33 = a.row3.dot(b.col3);
-    this.m34 = a.row3.dot(b.col4);
-    
-    this.m41 = a.row4.dot(b.col1);
-    this.m42 = a.row4.dot(b.col2);
-    this.m43 = a.row4.dot(b.col3);
-    this.m44 = a.row4.dot(b.col4);
-    
+    if (b.isMatrix4) {
+      const a = this.clone();
+      
+      this.m11 = a.row1.dot(b.col1);
+      this.m12 = a.row1.dot(b.col2);
+      this.m13 = a.row1.dot(b.col3);
+      this.m14 = a.row1.dot(b.col4);
+      
+      this.m21 = a.row2.dot(b.col1);
+      this.m22 = a.row2.dot(b.col2);
+      this.m23 = a.row2.dot(b.col3);
+      this.m24 = a.row2.dot(b.col4);
+      
+      this.m31 = a.row3.dot(b.col1);
+      this.m32 = a.row3.dot(b.col2);
+      this.m33 = a.row3.dot(b.col3);
+      this.m34 = a.row3.dot(b.col4);
+      
+      this.m41 = a.row4.dot(b.col1);
+      this.m42 = a.row4.dot(b.col2);
+      this.m43 = a.row4.dot(b.col3);
+      this.m44 = a.row4.dot(b.col4);
+    } else {
+      console.warn('Matrix4.js: (._multiply) expected b to be of type SATURN.Matrix4.');
+    }
     return this;
   }
   
   multiply(...matrices) { // => Matrix4
-    matrices.forEach(a => this._multiply(a));
+    if (matrices.every(matrix => matrix.isMatrix4)) {
+      matrices.forEach(a => this._multiply(a));
+    } else {
+      console.warn('Matrix4.js: (.multiply) expected matrices to be of type SATURN.Matrix4.');
+    }
     return this;
   }
   
@@ -221,7 +242,7 @@ class Matrix4 {
     return this;
   }
   
-  makeFromAxisAngle(axis, t) { // => Matrix4
+  /*makeFromAxisAngle(axis, t) { // => Matrix4
     // normalize the axis
     const u = axis.clone().normalize();
     const [sin, cos] = [Math.sin(t), Math.cos(t)];
@@ -245,7 +266,7 @@ class Matrix4 {
       0, 0, 0, 1,
     ];
     return this;
-  }
+  }*/
   
   makeOrthographic(left, right, bottom, top, near, far) { // => Matrix4
     this._elements = [
@@ -285,7 +306,6 @@ class Matrix4 {
   }
 }
 
-// TODO: for rows and columns, return Vector4's
 for (let i = 0; i < 4; i++) {
   Object.defineProperties(
     Matrix4.prototype,
@@ -297,7 +317,11 @@ for (let i = 0; i < 4; i++) {
           );
         },
         set(vector) { // => Vector4
-          this._elements.splice(i*4, 4, ...vector.toArray());
+          if (vector.isVector4) {
+            this._elements.splice(i*4, 4, ...vector.toArray());
+          } else {
+            console.warn(`Matrix4.js: (.set col${i+1}) expected vector to be of type SATURN.Vector4.`);
+          }
         },
       },
       [`row${i+1}`]: {
@@ -310,10 +334,14 @@ for (let i = 0; i < 4; i++) {
           );
         },
         set(vector) { // => Vector4
-          this._elements[i] = vector.x;
-          this._elements[i+4] = vector.y;
-          this._elements[i+8] = vector.z;
-          this._elements[i+12] = vector.w;
+          if (vector.isVector4) {
+            this._elements[i] = vector.x;
+            this._elements[i+4] = vector.y;
+            this._elements[i+8] = vector.z;
+            this._elements[i+12] = vector.w;
+          } else {
+            console.warn(`Matrix4.js: (.set row${i+1}) expected vector to be of type SATURN.Vector4.`);
+          }
         },
       }
     }

@@ -14,6 +14,9 @@ class Vector3 {
   toArray() {
     return [...this];
   }
+  toFloat32Array() {
+    return new Float32Array(this.toArray());
+  }
   get x() { // => number
     return this._x;
   }
@@ -39,10 +42,14 @@ class Vector3 {
       this._z ** 2
     );
   }
-  copy(v) { // => Vector3
-    this._x = v.x;
-    this._y = v.y;
-    this._z = v.z;
+  copy(vector) { // => Vector3
+    if (vector.isVector3) {
+      this._x = vector.x;
+      this._y = vector.y;
+      this._z = vector.z;
+    } else {
+      console.warn('Vector3.js: (.copy) expected vector to be of type SATURN.Vector3.');
+    }
     return this;
   }
   clone() { // => Vector3
@@ -51,36 +58,57 @@ class Vector3 {
     );
   }
   set(x, y, z) { // => Vector3
-    this._x = x;
-    this._y = y;
-    this._z = z;
+    this._x = x || this._x;
+    this._y = y || this._y;
+    this._z = z || this._z;
     return this;
   }
-  equals(v, tolerance = 0.001) { // => boolean
-    return (
-      (Math.abs(this._x - v.x) < tolerance) &&
-      (Math.abs(this._y - v.y) < tolerance) &&
-      (Math.abs(this._z - v.z) < tolerance)
-    );
+  equals(vector, tolerance = 0.001) { // => boolean
+    if (vector.isVector3) {
+      return (
+        (Math.abs(this._x - vector.x) < tolerance) &&
+        (Math.abs(this._y - vector.y) < tolerance) &&
+        (Math.abs(this._z - vector.z) < tolerance)
+      );
+    } else {
+      console.warn('Vector3.js: (.equals) expected vector to be of type SATURN.Vector3.');
+      return false;
+    }
   }
-  _add(v) { // => Vector3
-    this._x += v.x;
-    this._y += v.y;
-    this._z += v.z;
+  _add(vector) { // => Vector3
+    if (vector.isVector3) {
+      this._x += vector.x;
+      this._y += vector.y;
+      this._z += vector.z;
+    } else {
+      console.warn('Vector3.js: (._add) expected vector to be of type SATURN.Vector3.');
+    }
     return this;
   }
-  _sub(v) { // => Vector3
-    this._x -= v.x;
-    this._y -= v.y;
-    this._z -= v.z;
+  _sub(vector) { // => Vector3
+    if (vector.isVector) {
+      this._x -= vector.x;
+      this._y -= vector.y;
+      this._z -= vector.z;
+    } else {
+      console.warn('Vector3.js: (._sub) expected vector to be of type SATURN.Vector3.');
+    }
     return this;
   }
   add(...vectors) { // => Vector3
-    vectors.forEach(v => this._add(v));
+    if (vectors.every(vector => vector.isVector3)) {
+      vectors.forEach(v => this._add(v));
+    } else {
+      console.warn('Vector3.js: (.add) expected vectors to be of type SATURN.Vector3.');
+    }
     return this;
   }
   sub(...vectors) { // => Vector3
-    vectors.forEach(v => this._sub(v));
+    if (vectors.every(vector => vector.isVector3)) {
+      vectors.forEach(v => this._sub(v));
+    } else {
+      console.warn('Vector3.js: (.sub) expected vectors to be of type SATURN.Vector3.');
+    }
     return this;
   }
   scale(s) { // => Vector3
@@ -89,38 +117,57 @@ class Vector3 {
     this._z *= s;
     return this;
   }
-  dot(v) { // => number
-    return (
-      this._x * v.x +
-      this._y * v.y +
-      this._z * v.z
-    );
+  dot(vector) { // => number
+    if (vector.isVector3) {
+      return (
+        this._x * v.x +
+        this._y * v.y +
+        this._z * v.z
+      );
+    } else {
+      console.warn('Vector3.js: (.dot) expected vector to be of type SATURN.Vector3.');
+      return NaN;
+    }
   }
-  cross(v) { // => Vector3
-    const u = this.clone();
-    this._x = u.y * v.z - u.z * v.y;
-    this._y = u.z * v.x - u.x * v.z;
-    this._z = u.x * v.y - u.y * v.x;
+  cross(vector) { // => Vector3
+    if (vector.isVector3) {
+      const u = this.clone();
+      this._x = u.y * v.z - u.z * v.y;
+      this._y = u.z * v.x - u.x * v.z;
+      this._z = u.x * v.y - u.y * v.x;
+    } else {
+      console.warn('Vector3.js: (.cross) expected vector to be of type SATURN.Vector3.');
+    }
     return this;
   }
   normalize() { // => Vector3
     this.scale(1/this.magnitude);
     return this;
   }
-  angleTo(w) { // => number
-    // a * b == Math.cos(t)
-    const [u, v] = [
-      this.clone().normalize(),
-      w.clone().normalize(),
-    ];
-    return Math.acos(u.dot(v));
+  angleTo(vector) { // => number
+    if (vector.isVector3) {
+      // a * b == Math.cos(t)
+      const [u, v] = [
+        this.clone().normalize(),
+        vector.clone().normalize(),
+      ];
+      return Math.acos(u.dot(v));
+    } else {
+      console.warn('Vector3.js: (.angleTo) expected vector to be of type SATURN.Vector3.');
+      return NaN;
+    }
   }
-  applyMatrix4(m) {
-    _v4.set(...this).applyMatrix4(m);
-    // divide by perspective
-    this.x = _v4.x / _v4.w;
-    this.y = _v4.y / _v4.w;
-    this.z = _v4.z / _v4.w;
+  applyMatrix4(matrix) {
+    if (matrix.isMatrix4) {
+      _v4.set(...this).applyMatrix4(matrix);
+      
+      // divide by perspective
+      this.x = _v4.x / _v4.w;
+      this.y = _v4.y / _v4.w;
+      this.z = _v4.z / _v4.w;
+    } else {
+      console.warn('Vector3.js: (.applyMatrix4) expected matrix to be of type SATURN.Matrix4.');
+    }
     return this;
   }
   *[Symbol.iterator]() {

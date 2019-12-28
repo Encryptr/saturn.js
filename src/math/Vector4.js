@@ -11,6 +11,9 @@ class Vector4 {
   toArray() {
     return [...this];
   }
+  toFloat32Array() {
+    return new Float32Array(this.toArray());
+  }
   get x() {
     return this._x;
   }
@@ -43,11 +46,15 @@ class Vector4 {
       this._w ** 2
     );
   }
-  copy(v) {
-    this._x = v.x;
-    this._y = v.y;
-    this._z = v.z;
-    this._w = v.w;
+  copy(vector) {
+    if (vector.isVector4) {
+      this._x = v.x;
+      this._y = v.y;
+      this._z = v.z;
+      this._w = v.w;
+    } else {
+      console.warn('Vector4.js: (.copy) expected vector to be of type SATURN.Vector4.');
+    }
     return this;
   }
   clone() {
@@ -56,40 +63,61 @@ class Vector4 {
     );
   }
   set(x, y, z, w) {
-    this._x = x;
-    this._y = y;
-    this._z = z;
-    this._w = w;
+    this._x = x || this._x;
+    this._y = y || this._y;
+    this._z = z || this._z;
+    this._w = w || this._w;
     return this;
   }
-  equals(v, tolerance = 0.001) {
-    return (
-      (Math.abs(this._x - v.x) < tolerance) &&
-      (Math.abs(this._y - v.y) < tolerance) &&
-      (Math.abs(this._z - v.z) < tolerance) &&
-      (Math.abs(this._w - v.w) < tolerance)
-    );
+  equals(vector, tolerance = 0.001) {
+    if (vector.isVector4) {
+      return (
+        (Math.abs(this._x - vector.x) < tolerance) &&
+        (Math.abs(this._y - vector.y) < tolerance) &&
+        (Math.abs(this._z - vector.z) < tolerance) &&
+        (Math.abs(this._w - vector.w) < tolerance)
+      );
+    } else {
+      console.warn('Vector4.js: (.equals) expected vector to be of type SATURN.Vector4.');
+      return false;
+    }
   }
-  add(v) {
-    this._x += v.x;
-    this._y += v.y;
-    this._z += v.z;
-    this._w += v.w;
+  _add(vector) {
+    if (vector.isVector4) {
+      this._x += v.x;
+      this._y += v.y;
+      this._z += v.z;
+      this._w += v.w;
+    } else {
+      console.warn('Vector4.js: (._add) expected vector to be of type SATURN.Vector4.');
+    }
     return this;
   }
-  subtract(v) {
-    this._x -= v.x;
-    this._y -= v.y;
-    this._z -= v.z;
-    this._w -= v.w;
+  _sub(vector) {
+    if (vector.isVector4) {
+      this._x -= v.x;
+      this._y -= v.y;
+      this._z -= v.z;
+      this._w -= v.w;
+    } else {
+      console.warn('Vector4.js: (._sub) expected vector to be of type SATURN.Vector4.');
+    }
     return this;
   }
-  addVectors(...vectors) {
-    vectors.forEach(v => this.add(v));
+  add(...vectors) {
+    if (vectors.every(vector => vector.isVector4)) {
+      vectors.forEach(v => this.add(v));
+    } else {
+      console.warn('Vector4.js: (.add) expected vectors to be of type SATURN.Vector4.');
+    }
     return this;
   }
-  subtractVectors(...vectors) {
-    vectors.forEach(v => this.subtract(v));
+  sub(...vectors) {
+    if (vectors.every(vector => vector.isVector4)) {
+      vectors.forEach(v => this.sub(v));
+    } else {
+      console.warn('Vector4.js: (.sub) expected vectors to be of type SATURN.Vector4.');
+    }
     return this;
   }
   scale(s) {
@@ -99,26 +127,33 @@ class Vector4 {
     this._w *= s;
     return this;
   }
-  dot(v) {
-    return (
-      this._x * v.x +
-      this._y * v.y +
-      this._z * v.z +
-      this._w * v.w
-    );
+  dot(vector) {
+    if (vector.isVector4) {
+      return (
+        this._x * vector.x +
+        this._y * vector.y +
+        this._z * vector.z +
+        this._w * vector.w
+      );
+    } else {
+      console.warn('Vector4.js: (.sub) expected vector to be of type SATURN.Vector4.');
+      return NaN;
+    }
   }
   normalize() {
     this.scale(1/this.magnitude);
     return this;
   }
-  applyMatrix4(m) {
-    const v = this.clone();
-    
-    this.x = v.dot(m.col0);
-    this.y = v.dot(m.col1);
-    this.z = v.dot(m.col2);
-    this.w = v.dot(m.col3);
-    
+  applyMatrix4(matrix) {
+    if (matrix.isMatrix4) {
+      const v = this.clone();
+      this.x = v.dot(matrix.col0);
+      this.y = v.dot(matrix.col1);
+      this.z = v.dot(matrix.col2);
+      this.w = v.dot(matrix.col3);
+    } else {
+      console.warn('Vector4.js: (.applyMatrix4) expected matrix to be of type SATURN.Matrix4.');
+    }
     return this;
   }
   *[Symbol.iterator]() {
