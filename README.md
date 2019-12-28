@@ -1,18 +1,13 @@
 # saturn.js
 Small 3D engine built on WebGL 2.0
 
-*Note: all current modules have been deprecated. The engine will be rewritten soon*
-
-
 ## Intended Features:
 * **Renderers**
   - [x] `Renderer`
-  - [ ] `DeferredRenderer` (?)
-  - [ ] `RenderList`
 
 * **Materials**
-  - [x] `ShaderMaterial`
-  - [ ] `FlatMaterial`
+  - [x] `Material`
+  - [x] `FlatMaterial`
   - [ ] `LambertMaterial`
   - [ ] `PhongMaterial`
   
@@ -20,8 +15,7 @@ Small 3D engine built on WebGL 2.0
   - [x] `Matrix4`
   - [x] `Vector4`
   - [x] `Vector3`
-  - [ ] `Vector2`
-  - [ ] `Quaternion` (?)
+  - [ ] `Quaternion`
 
 * **Lights**
   - [ ] `PointLight`
@@ -31,12 +25,15 @@ Small 3D engine built on WebGL 2.0
 * **Scene-Graph**
   - [x] `RenderObject`
   - [x] `Mesh`
+  - [x] `Scene`
 
 * **Loaders**
   - [ ] `GLTFLoader`
 
-* **Misc.**
+* **Geometries**
   - [x] `Attribute`
   - [x] `Geometry`
-  - [ ] `TextureLoader`
-  - [ ] `Texture`
+  
+* **Textures**
+  - [x] `TextureLoader`
+  - [x] `Texture`
