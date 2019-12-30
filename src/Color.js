@@ -9,6 +9,9 @@ class Color {
   get isColor() {
     return true;
   }
+  get colorId() {
+    return (this._r << 16 | this._b << 8 | this._g).toString(16);
+  }
   get r() {
     return this._r;
   }
@@ -50,6 +53,10 @@ class Color {
   }
   toFloat32ArrayNormalized() {
     return new Float32Array(this.toArrayNormalized());
+  }
+  copyIntoFloat32ArrayNormalized(typedArray) {
+    typedArray.set([...this.toArrayNormalized()]);
+    return typedArray;
   }
   *[Symbol.iterator]() {
     yield this._r;

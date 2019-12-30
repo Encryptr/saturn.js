@@ -1,3 +1,7 @@
+import { Cache } from './Cache.js';
+
+const contextMap = new WeakMap();
+
 export function compileShader(gl, source, type) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);

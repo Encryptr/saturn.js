@@ -23,19 +23,21 @@ class PhongMaterial extends Material {
       numSpotLights: 0,
     }, {
       set: (object, key, value) => {
-        Reflect.set(object, key, value);
-        
-        // update define headers
-        this._fragmentShader = this._fragmentShader.replace(
-          /#define NUM_DIR_LIGHTS \d+/g, `#define NUM_DIR_LIGHTS ${this._state.numDirLights}`
-        ).replace(
-          /#define NUM_POINT_LIGHTS \d+/g, `#define NUM_POINT_LIGHTS ${this._state.numPointLights}`
-        ).replace(
-          /#define NUM_SPOT_LIGHTS \d+/g, `#define NUM_SPOT_LIGHTS ${this._state.numSpotLights}`
-        );
-        
-        // reset id
-        this._id = generateKey();
+        if (object[key] !== value) {
+          Reflect.set(object, key, value);
+          
+          // update define headers
+          this._fragmentShader = this._fragmentShader.replace(
+            /#define NUM_DIR_LIGHTS \d+/g, `#define NUM_DIR_LIGHTS ${this._state.numDirLights}`
+          ).replace(
+            /#define NUM_POINT_LIGHTS \d+/g, `#define NUM_POINT_LIGHTS ${this._state.numPointLights}`
+          ).replace(
+            /#define NUM_SPOT_LIGHTS \d+/g, `#define NUM_SPOT_LIGHTS ${this._state.numSpotLights}`
+          );
+          
+          // reset id
+          this._id = generateKey();
+        }
         return true;
       }
     });

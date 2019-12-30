@@ -25,6 +25,11 @@ class Renderer {
     // caches
     this._vaoCache = new Cache();
     this._programCache = new Cache();
+    this._textureCache = new Cache();
+    
+    // allocate Float32Arrays beforehand
+    this._matrixF32 = new Float32Array(16);
+    this._vectorF32 = new Float32Array(3);
     
     // initialization
     this._gl.enable(this._gl.CULL_FACE);
@@ -49,6 +54,7 @@ class Renderer {
     }
   }
   _initMaterial(material) {
+    console.info('Renderer.js: (._initMaterial) created ProgramInfo.');
     const program = ShaderUtil.compileProgram(
       this._gl,
       material.vertexShader,
@@ -61,7 +67,6 @@ class Renderer {
     }
     
     if (material.isLambertMaterial || material.isPhongMaterial) {
-      console.log(material);
       for (let i = 1; i < material.state.numDirLights + 1; i++) {
         uniforms[`directionalLights[${i}].direction`] = this._gl.getUniformLocation(program, `directionalLights[${i}].direction`);
         uniforms[`directionalLights[${i}].color`] = this._gl.getUniformLocation(program, `directionalLights[${i}].color`);
@@ -89,6 +94,7 @@ class Renderer {
     return this._programCache.get(material.id);
   }
   _initGeometry(geometry) {
+    console.info('Renderer.js: (._initGeometry) created vertex array object.');
     const vao = this._gl.createVertexArray();
     this._gl.bindVertexArray(vao);
     
@@ -110,18 +116,32 @@ class Renderer {
     this._vaoCache.set(geometry.id, vao);
     return this._vaoCache.get(geometry.id);
   }
+  _initTexture(texture) {
+    console.info('Renderer.js: (._initTexture) created texture.');
+    this._textureCache.set(texture.id, ShaderUtil.createTexture(this._gl, texture.image));
+    return this._textureCache.get(texture.id);
+  }
+  _initColor(color) {
+    console.info('Renderer.js: (._initColor) created texture.');
+    this._textureCache.set(color.colorId, ShaderUtil.createSingleColorTexture(this._gl, ...color));
+    return this._textureCache.get(color.colorId);
+  }
   _setProgram(scene, camera, material, object, lights) {
     
     let currentTextureUnit = 0;
     
     // update material state
-    if (material.isLambertMaterial || material.isPhongMaterial) {
+    /*if (material.isLambertMaterial || material.isPhongMaterial) {
       if (this._state.numDirLights !== material.state.numDirLights)
         material.state.numDirLights = this._state.numDirLights;
       if (this._state.numPointLights !== material.state.numPointLights)
         material.state.numPointLights = this._state.numPointLights;
       if (this._state.numSpotLights !== material.state.numSpotLights)
         material.state.numSpotLights = this._state.numSpotLights;
+    }*/
+    
+    if (material.isLambertMaterial || material.isPhongMaterial) {
+      Object.assign(material.state, this._state);
     }
     
     const {
@@ -130,19 +150,15 @@ class Renderer {
     
     this._gl.useProgram(program);
     
-    this._gl.uniformMatrix4fv(uniforms.u_model, false, object.worldMatrix.toFloat32Array());
-    this._gl.uniformMatrix4fv(uniforms.u_view, false, camera.viewMatrix.toFloat32Array());
-    this._gl.uniformMatrix4fv(uniforms.u_projection, false, camera.projectionMatrix.toFloat32Array());
+    this._gl.uniformMatrix4fv(uniforms.u_model, false, object.worldMatrix.copyIntoFloat32Array(this._matrixF32));
+    this._gl.uniformMatrix4fv(uniforms.u_view, false, camera.viewMatrix.copyIntoFloat32Array(this._matrixF32));
+    this._gl.uniformMatrix4fv(uniforms.u_projection, false, camera.projectionMatrix.copyIntoFloat32Array(this._matrixF32));
     
     let materialTexture;
     if (material.texture) {
-      materialTexture = ShaderUtil.createTexture(
-        this._gl, material.texture.image,
-      );
+      materialTexture = this._textureCache.get(material.texture.id) || this._initTexture(material.texture);
     } else {
-      materialTexture = ShaderUtil.createSingleColorTexture(
-        this._gl, ...material.color,
-      );
+      materialTexture = this._textureCache.get(material.color.colorId) || this._initColor(material.color);
     }
     
     // texture unit 0 is reserved for material's texture/color
@@ -150,9 +166,9 @@ class Renderer {
     this._gl.activeTexture(this._gl.TEXTURE0);
     
     // clear previous texture
-    this._gl.deleteTexture(
+    /*this._gl.deleteTexture(
       this._gl.getParameter(this._gl.TEXTURE_BINDING_2D)
-    );
+    );*/
     
     // bind new texture
     this._gl.bindTexture(this._gl.TEXTURE_2D, materialTexture);
@@ -168,20 +184,20 @@ class Renderer {
       const spotLights = lights.filter(object => object.isSpotLight);
       
       for (let i = 0; i < directionalLights.length; i++) {
-        this._gl.uniform3fv(uniforms[`directionalLights[${i+1}].direction`], directionalLights[i].direction.toFloat32Array());
-        this._gl.uniform3fv(uniforms[`directionalLights[${i+1}].color`], directionalLights[i].color.toFloat32ArrayNormalized());
+        this._gl.uniform3fv(uniforms[`directionalLights[${i+1}].direction`], directionalLights[i].direction.copyIntoFloat32Array(this._vectorF32));
+        this._gl.uniform3fv(uniforms[`directionalLights[${i+1}].color`], directionalLights[i].color.copyIntoFloat32ArrayNormalized(this._vectorF32));
         this._gl.uniform1f(uniforms[`directionalLights[${i+1}].intensity`], directionalLights[i].intensity);
       }
       for (let i = 0; i < pointLights.length; i++) {
-        this._gl.uniform3fv(uniforms[`pointLights[${i+1}].position`], pointLights[i].position.toFloat32Array());
-        this._gl.uniform3fv(uniforms[`pointLights[${i+1}].color`], pointLights[i].color.toFloat32ArrayNormalized());
+        this._gl.uniform3fv(uniforms[`pointLights[${i+1}].position`], pointLights[i].position.copyIntoFloat32Array(this._vectorF32));
+        this._gl.uniform3fv(uniforms[`pointLights[${i+1}].color`], pointLights[i].color.copyIntoFloat32ArrayNormalized(this._vectorF32));
         this._gl.uniform1f(uniforms[`pointLights[${i+1}].intensity`], pointLights[i].intensity);
       }
       for (let i = 0; i < spotLights.length; i++) {
-        this._gl.uniform3fv(uniforms[`spotLights[${i+1}].direction`], spotLights[i].direction.toFloat32Array());
-        this._gl.uniform3fv(uniforms[`spotLights[${i+1}].color`], spotLights[i].color.toFloat32ArrayNormalized());
+        this._gl.uniform3fv(uniforms[`spotLights[${i+1}].direction`], spotLights[i].direction.copyIntoFloat32Array(this._vectorF32));
+        this._gl.uniform3fv(uniforms[`spotLights[${i+1}].color`], spotLights[i].color.copyIntoFloat32ArrayNormalized(this._vectorF32));
         this._gl.uniform1f(uniforms[`spotLights[${i+1}].intensity`], spotLights[i].intensity);
-        this._gl.uniform3fv(uniforms[`spotLights[${i+1}].position`], spotLights[i].position.toFloat32Array());
+        this._gl.uniform3fv(uniforms[`spotLights[${i+1}].position`], spotLights[i].position.copyIntoFloat32Array(this._vectorF32));
         this._gl.uniform1f(uniforms[`spotLights[${i+1}].innerLimit`], spotLights[i].limit);
         this._gl.uniform1f(uniforms[`spotLights[${i+1}].outerLimit`], spotLights[i].limit + 0.05);
       }
