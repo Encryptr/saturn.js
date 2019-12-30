@@ -45,7 +45,17 @@ class Geometry {
     if (attribute.isAttribute) {
       this._attributes[1] = attribute;
     } else {
-      console.warn('Geometry.js: (.set position) expected attribute to be of type SATURN.Attribute.');
+      console.warn('Geometry.js: (.set uv) expected attribute to be of type SATURN.Attribute.');
+    }
+  }
+  get normal() {
+    return this._attributes[2];
+  }
+  set normal(attribute) {
+    if (attribute.isAttribute) {
+      this._attributes[2] = attribute;
+    } else {
+      console.warn('Geometry.js: (.set normal) expected attribute to be of type SATURN.Attribute.');
     }
   }
 }

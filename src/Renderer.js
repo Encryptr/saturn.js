@@ -16,6 +16,12 @@ class Renderer {
     this._domElement = domElement;
     this._gl = domElement.getContext('webgl2');
     
+    this._state = {
+      numDirLights: 0,
+      numPointLights: 0,
+      numSpotLights: 0,
+    }
+    
     // caches
     this._vaoCache = new Cache();
     this._programCache = new Cache();
@@ -54,6 +60,28 @@ class Renderer {
       uniforms[name] = this._gl.getUniformLocation(program, name);
     }
     
+    if (material.isLambertMaterial || material.isPhongMaterial) {
+      console.log(material);
+      for (let i = 1; i < material.state.numDirLights + 1; i++) {
+        uniforms[`directionalLights[${i}].direction`] = this._gl.getUniformLocation(program, `directionalLights[${i}].direction`);
+        uniforms[`directionalLights[${i}].color`] = this._gl.getUniformLocation(program, `directionalLights[${i}].color`);
+        uniforms[`directionalLights[${i}].intensity`] = this._gl.getUniformLocation(program, `directionalLights[${i}].intensity`);
+      }
+      for (let i = 1; i < material.state.numPointLights + 1; i++) {
+        uniforms[`pointLights[${i}].position`] = this._gl.getUniformLocation(program, `pointLights[${i}].position`);
+        uniforms[`pointLights[${i}].color`] = this._gl.getUniformLocation(program, `pointLights[${i}].color`);
+        uniforms[`pointLights[${i}].intensity`] = this._gl.getUniformLocation(program, `pointLights[${i}].intensity`);
+      }
+      for (let i = 1; i < material.state.numSpotLights + 1; i++) {
+        uniforms[`spotLights[${i}].direction`] = this._gl.getUniformLocation(program, `spotLights[${i}].direction`);
+        uniforms[`spotLights[${i}].color`] = this._gl.getUniformLocation(program, `spotLights[${i}].color`);
+        uniforms[`spotLights[${i}].intensity`] = this._gl.getUniformLocation(program, `spotLights[${i}].intensity`);
+        uniforms[`spotLights[${i}].position`] = this._gl.getUniformLocation(program, `spotLights[${i}].position`);
+        uniforms[`spotLights[${i}].innerLimit`] = this._gl.getUniformLocation(program, `spotLights[${i}].innerLimit`);
+        uniforms[`spotLights[${i}].outerLimit`] = this._gl.getUniformLocation(program, `spotLights[${i}].outerLimit`);
+      }
+    }
+    
     this._programCache.set(
       material.id,
       new ProgramInfo(program, uniforms),
@@ -82,9 +110,19 @@ class Renderer {
     this._vaoCache.set(geometry.id, vao);
     return this._vaoCache.get(geometry.id);
   }
-  _setProgram(scene, camera, material, object) {
+  _setProgram(scene, camera, material, object, lights) {
     
     let currentTextureUnit = 0;
+    
+    // update material state
+    if (material.isLambertMaterial || material.isPhongMaterial) {
+      if (this._state.numDirLights !== material.state.numDirLights)
+        material.state.numDirLights = this._state.numDirLights;
+      if (this._state.numPointLights !== material.state.numPointLights)
+        material.state.numPointLights = this._state.numPointLights;
+      if (this._state.numSpotLights !== material.state.numSpotLights)
+        material.state.numSpotLights = this._state.numSpotLights;
+    }
     
     const {
       program, uniforms,
@@ -110,9 +148,52 @@ class Renderer {
     // texture unit 0 is reserved for material's texture/color
     this._gl.uniform1i(uniforms.u_texture, currentTextureUnit);
     this._gl.activeTexture(this._gl.TEXTURE0);
+    
+    // clear previous texture
+    this._gl.deleteTexture(
+      this._gl.getParameter(this._gl.TEXTURE_BINDING_2D)
+    );
+    
+    // bind new texture
     this._gl.bindTexture(this._gl.TEXTURE_2D, materialTexture);
     
+    // increment texture unit
     currentTextureUnit += 1;
+    
+    // lights
+    if (material.isLambertMaterial || material.isPhongMaterial) {
+      
+      const directionalLights = lights.filter(object => object.isDirectionalLight);
+      const pointLights = lights.filter(object => object.isPointLight);
+      const spotLights = lights.filter(object => object.isSpotLight);
+      
+      for (let i = 0; i < directionalLights.length; i++) {
+        this._gl.uniform3fv(uniforms[`directionalLights[${i+1}].direction`], directionalLights[i].direction.toFloat32Array());
+        this._gl.uniform3fv(uniforms[`directionalLights[${i+1}].color`], directionalLights[i].color.toFloat32ArrayNormalized());
+        this._gl.uniform1f(uniforms[`directionalLights[${i+1}].intensity`], directionalLights[i].intensity);
+      }
+      for (let i = 0; i < pointLights.length; i++) {
+        this._gl.uniform3fv(uniforms[`pointLights[${i+1}].position`], pointLights[i].position.toFloat32Array());
+        this._gl.uniform3fv(uniforms[`pointLights[${i+1}].color`], pointLights[i].color.toFloat32ArrayNormalized());
+        this._gl.uniform1f(uniforms[`pointLights[${i+1}].intensity`], pointLights[i].intensity);
+      }
+      for (let i = 0; i < spotLights.length; i++) {
+        this._gl.uniform3fv(uniforms[`spotLights[${i+1}].direction`], spotLights[i].direction.toFloat32Array());
+        this._gl.uniform3fv(uniforms[`spotLights[${i+1}].color`], spotLights[i].color.toFloat32ArrayNormalized());
+        this._gl.uniform1f(uniforms[`spotLights[${i+1}].intensity`], spotLights[i].intensity);
+        this._gl.uniform3fv(uniforms[`spotLights[${i+1}].position`], spotLights[i].position.toFloat32Array());
+        this._gl.uniform1f(uniforms[`spotLights[${i+1}].innerLimit`], spotLights[i].limit);
+        this._gl.uniform1f(uniforms[`spotLights[${i+1}].outerLimit`], spotLights[i].limit + 0.05);
+      }
+    }
+    
+    // phong-specific uniforms
+    if (material.isPhongMaterial) {
+      this._gl.uniform1f(uniforms.u_shininess, material.shininess);
+      this._gl.uniform3fv(uniforms.u_specularColor,
+        new Float32Array(material.specularColor.toArrayNormalized()),
+      );
+    }
   }
   render(scene, camera) {
     this._gl.clearColor(
@@ -120,15 +201,21 @@ class Renderer {
     );
     this._gl.clear(this._gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
     
+    // update state
+    const sceneAncestors =  scene.ancestors;
+    const lights = sceneAncestors.filter(object => object.isLight);
+    this._state.numDirLights = sceneAncestors.filter(object => object.isDirectionalLight).length;
+    this._state.numPointLights = sceneAncestors.filter(object => object.isPointLight).length;
+    this._state.numSpotLights = sceneAncestors.filter(object => object.isSpotLight).length;
+    
     scene.traverseAncestors(object => {
       if (object.isMesh) {
         const geometry = object.geometry;
         const material = object.material;
-        
         const vao = this._vaoCache.get(geometry.id) || this._initGeometry(geometry);
-        this._gl.bindVertexArray(vao);
         
-        this._setProgram(scene, camera, material, object);
+        this._gl.bindVertexArray(vao);
+        this._setProgram(scene, camera, material, object, lights);
         
         this._gl.drawElements(this._gl.TRIANGLES, geometry.count, this._gl.UNSIGNED_SHORT, 0);
       }

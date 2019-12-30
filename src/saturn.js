@@ -6,12 +6,17 @@ export { Scene } from './Scene.js';
 export { Attribute } from './Attribute.js';
 export { Geometry } from './Geometry.js';
 export { Renderer } from './Renderer.js';
-export * from './Camera.js';
 export { Mesh } from './Mesh.js';
 export { Color } from './Color.js';
 export { Fog } from './Fog.js';
 export { TextureLoader } from './TextureLoader.js';
 export { Texture } from './Texture.js';
-export { default as CORE_VERTEX } from './CORE_VERTEX.glsl.js'
-export { default as CORE_FRAGMENT } from './CORE_FRAGMENT.glsl.js'
-export * from './Material.js';
+export { Material } from './Material.js';
+export { FlatMaterial } from './FlatMaterial.js';
+export { LambertMaterial } from './LambertMaterial.js';
+export { PhongMaterial } from './PhongMaterial.js';
+export { Light } from './Light.js';
+export { DirectionalLight } from './DirectionalLight.js';
+export { PointLight } from './PointLight.js';
+export { SpotLight } from './SpotLight.js';
+export * from './Camera.js';

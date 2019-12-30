@@ -100,7 +100,7 @@ class RenderObject {
     return this._parent;
   }
   set parent(object) {
-    if (object.isRenderObject) {
+    if (object === null || object.isRenderObject) {
       this._parent = object;
     } else {
       console.warn('RenderObject.js: (.set parent) expected object to be of type SATURN.RenderObject.');
@@ -133,7 +133,7 @@ class RenderObject {
       console.warn('RenderObject.js: (.add) expected object to be of type SATURN.RenderObject.');
     }
   }
-  remove(o) {
+  remove(object) {
     const index = this._children.indexOf(object);
     if (index !== -1) {
       this._children.splice(index, 1);

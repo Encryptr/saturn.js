@@ -42,8 +42,14 @@ class Color {
   toArray() {
     return [this._r, this._g, this._b];
   }
+  toFloat32Array() {
+    return new Float32Array(this.toArray());
+  }
   toArrayNormalized() {
     return this.toArray().map(n => n / 255);
+  }
+  toFloat32ArrayNormalized() {
+    return new Float32Array(this.toArrayNormalized());
   }
   *[Symbol.iterator]() {
     yield this._r;
