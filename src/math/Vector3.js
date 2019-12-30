@@ -120,9 +120,9 @@ class Vector3 {
   dot(vector) { // => number
     if (vector.isVector3) {
       return (
-        this._x * v.x +
-        this._y * v.y +
-        this._z * v.z
+        this._x * vector.x +
+        this._y * vector.y +
+        this._z * vector.z
       );
     } else {
       console.warn('Vector3.js: (.dot) expected vector to be of type SATURN.Vector3.');
@@ -132,9 +132,9 @@ class Vector3 {
   cross(vector) { // => Vector3
     if (vector.isVector3) {
       const u = this.clone();
-      this._x = u.y * v.z - u.z * v.y;
-      this._y = u.z * v.x - u.x * v.z;
-      this._z = u.x * v.y - u.y * v.x;
+      this._x = u.y * vector.z - u.z * vector.y;
+      this._y = u.z * vector.x - u.x * vector.z;
+      this._z = u.x * vector.y - u.y * vector.x;
     } else {
       console.warn('Vector3.js: (.cross) expected vector to be of type SATURN.Vector3.');
     }
