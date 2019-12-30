@@ -17,6 +17,10 @@ class Vector3 {
   toFloat32Array() {
     return new Float32Array(this.toArray());
   }
+  copyIntoFloat32Array(typedArray) {
+    typedArray.set(this.toArray());
+    return typedArray;
+  }
   get x() { // => number
     return this._x;
   }

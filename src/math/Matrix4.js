@@ -25,6 +25,11 @@ class Matrix4 {
     return new Float32Array(this._elements);
   }
   
+  copyIntoFloat32Array(typedArray) {
+    typedArray.set(this._elements);
+    return typedArray;
+  }
+  
   copy(matrix) {
     if (matrix.isMatrix4) {
       this._elements = matrix.toArray();
