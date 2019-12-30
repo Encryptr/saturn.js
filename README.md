@@ -1,39 +1,28 @@
 # saturn.js
 Small 3D engine built on WebGL 2.0
 
-## Intended Features:
-* **Renderers**
-  - [x] `Renderer`
-
-* **Materials**
-  - [x] `Material`
-  - [x] `FlatMaterial`
-  - [ ] `LambertMaterial`
-  - [ ] `PhongMaterial`
+## Completed Features:
+  - `Renderer`
+  - `Material`
+  - `FlatMaterial`
+  - `LambertMaterial`
+  - `PhongMaterial`
+  - `Matrix4`
+  - `Vector4`
+  - `Vector3`
+  - `PointLight`
+  - `DirectionalLight`
+  - `SpotLight`
+  - `RenderObject`
+  - `Mesh`
+  - `Scene`
+  - `Attribute`
+  - `Geometry`
+  - `TextureLoader`
+  - `Texture`
   
-* **Math Utilities**
-  - [x] `Matrix4`
-  - [x] `Vector4`
-  - [x] `Vector3`
-  - [ ] `Quaternion`
-
-* **Lights**
-  - [ ] `PointLight`
-  - [ ] `DirectionalLight`
-  - [ ] `SpotLight`
-
-* **Scene-Graph**
-  - [x] `RenderObject`
-  - [x] `Mesh`
-  - [x] `Scene`
-
-* **Loaders**
-  - [ ] `GLTFLoader`
-
-* **Geometries**
-  - [x] `Attribute`
-  - [x] `Geometry`
-  
-* **Textures**
-  - [x] `TextureLoader`
-  - [x] `Texture`
+## Planned Features:
+  - `Quaternion`
+  - `GLTFLoader`
+  - `AmbientLight`
+  - `Shadow` (???)
