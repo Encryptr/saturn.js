@@ -33,6 +33,8 @@ in vec3 v_normal;
 in vec3 v_surfacePosition;
 
 uniform sampler2D u_texture;
+uniform vec3 u_ambientColor;
+uniform float u_ambientIntensity;
 uniform DirectionalLight directionalLights[NUM_DIR_LIGHTS + 1];
 uniform PointLight pointLights[NUM_POINT_LIGHTS + 1];
 uniform SpotLight spotLights[NUM_SPOT_LIGHTS + 1];
@@ -46,6 +48,11 @@ void main() {
   vec3 normal = normalize(v_normal);
   vec3 totalLight = vec3(0, 0, 0);
   vec3 surfaceToLight = vec3(0, 0, 0);
+  
+  totalLight += clamp(
+    u_ambientColor * u_ambientIntensity,
+    vec3(0, 0, 0), vec3(1, 1, 1)
+  );
   
   for (int i = 1; i < NUM_DIR_LIGHTS+1; i++) {
     

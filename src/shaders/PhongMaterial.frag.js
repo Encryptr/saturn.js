@@ -35,11 +35,13 @@ struct SpotLight {
 // varyings
 in vec2 v_uv;
 in vec3 v_normal;
-in vec3 v_surfacePosition;
-in vec3 v_surfaceToView;
+in vec3 v_fragPosition;
+in vec3 v_fragToView;
 
 // uniforms
 uniform sampler2D u_texture;
+uniform vec3 u_ambientColor;
+uniform float u_ambientIntensity;
 uniform float u_shininess;
 uniform vec3 u_specularColor;
 uniform DirectionalLight directionalLights[NUM_DIR_LIGHTS + 1];
@@ -53,15 +55,21 @@ void main() {
   // main output
   color = texture(u_texture, v_uv);
   
-  // declare variables
-  vec3 normal = normalize(v_normal);
-  vec3 surfaceToViewDir = normalize(v_surfaceToView);
+  // declare variables beforehand
   vec3 totalLight = vec3(0, 0, 0);
   vec3 diffuse = vec3(0, 0, 0);
-  vec3 surfaceToLightDir = vec3(0, 0, 0);
-  vec3 halfVector = vec3(0, 0, 0);
+  vec3 fragToLightNorm = vec3(0, 0, 0);
+  vec3 phongHalfVector = vec3(0, 0, 0);
   float totalSpecular = 0.0;
   
+  // normalize vars
+  vec3 fragToViewNorm = normalize(v_fragToView);
+  vec3 normal = normalize(v_normal);
+  
+  totalLight += clamp(
+    u_ambientColor * u_ambientIntensity,
+    vec3(0, 0, 0), vec3(1, 1, 1)
+  );
   
   for (int i = 1; i < NUM_DIR_LIGHTS+1; i++) {
     
@@ -69,22 +77,18 @@ void main() {
     DirectionalLight light = directionalLights[i];
     
     // surface to light unit vector
-    surfaceToLightDir = normalize(-light.direction);
+    fragToLightNorm = normalize(-light.direction);
     
     // diffuse color
     diffuse = clamp(
-      dot(-light.direction, normal) * light.color * light.intensity,
+      dot(fragToLightNorm, normal) * light.color * light.intensity,
       vec3(0, 0, 0), vec3(1, 1, 1) // min/max light levels
     );
     
-    // specular
-    halfVector = normalize(surfaceToLightDir + surfaceToViewDir);
-    if (diffuse != vec3(0, 0, 0)) {
-      totalSpecular += clamp(
-        pow(dot(normal, halfVector), u_shininess),
-        0.0, 1.0
-      );
-    }
+    // specular component
+    phongHalfVector = normalize(fragToLightNorm + fragToViewNorm);
+    if (diffuse != vec3(0, 0, 0))
+      totalSpecular +=  pow(max(dot(normal, phongHalfVector), 0.0), u_shininess);
     
     // add to total light
     totalLight += diffuse;
@@ -97,19 +101,18 @@ void main() {
     PointLight light = pointLights[i];
     
     // surface to light unit vector
-    surfaceToLightDir = normalize(light.position - v_surfacePosition);
+    fragToLightNorm = normalize(light.position - v_fragPosition);
     
     // diffuse color
     diffuse = clamp(
-      dot(surfaceToLightDir, normal) * light.color * light.intensity,
+      dot(fragToLightNorm, normal) * light.color * light.intensity,
       vec3(0, 0, 0), vec3(1, 1, 1) // min/max light levels
     );
     
-    // specular
-    halfVector = normalize(surfaceToLightDir + surfaceToViewDir);
-    if (diffuse != vec3(0, 0, 0)) {
-      totalSpecular +=  pow(dot(normal, halfVector), u_shininess);
-    }
+    // specular component
+    phongHalfVector = normalize(fragToLightNorm + fragToViewNorm);
+    if (diffuse != vec3(0, 0, 0))
+      totalSpecular +=  pow(max(dot(normal, phongHalfVector), 0.0), u_shininess);
     
     // add to total light
     totalLight += diffuse;
@@ -122,9 +125,9 @@ void main() {
     SpotLight light = spotLights[i];
     
     // surface to light unit vector
-    surfaceToLightDir = normalize(light.position - v_surfacePosition);
+    fragToLightNorm = normalize(light.position - v_fragPosition);
     
-    float dotFromDirection = dot(surfaceToLightDir, -light.direction);
+    float dotFromDirection = dot(fragToLightNorm, -light.direction);
     float inLight = smoothstep(
       cos(light.outerLimit),
       cos(light.innerLimit),
@@ -133,18 +136,14 @@ void main() {
     
     // diffuse color
     diffuse = inLight * clamp(
-      dot(surfaceToLightDir, normal) * light.color * light.intensity,
+      dot(fragToLightNorm, normal) * light.color * light.intensity,
       vec3(0, 0, 0), vec3(1, 1, 1) // min/max light levels
     );
     
-    // specular
-    halfVector = normalize(surfaceToLightDir + surfaceToViewDir);
-    if (diffuse != vec3(0, 0, 0)) {
-      totalSpecular += inLight * clamp(
-        pow(dot(normal, halfVector), u_shininess),
-        0.0, 1.0
-      );
-    }
+    // specular component
+    phongHalfVector = normalize(fragToLightNorm + fragToViewNorm);
+    if (diffuse != vec3(0, 0, 0))
+      totalSpecular +=  inLight * pow(max(dot(normal, phongHalfVector), 0.0), u_shininess);
     
     // add to total light
     totalLight += diffuse;
