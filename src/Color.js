@@ -10,7 +10,7 @@ class Color {
     return true;
   }
   get colorId() {
-    return (this._r << 16 | this._b << 8 | this._g).toString(16);
+    return (this._r << 16 | this._g << 8 | this._b).toString(16);
   }
   get r() {
     return this._r;

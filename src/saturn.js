@@ -20,3 +20,4 @@ export { DirectionalLight } from './DirectionalLight.js';
 export { PointLight } from './PointLight.js';
 export { SpotLight } from './SpotLight.js';
 export * from './Camera.js';
+export * from './constants.js';

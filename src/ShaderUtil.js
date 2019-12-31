@@ -1,7 +1,3 @@
-import { Cache } from './Cache.js';
-
-const contextMap = new WeakMap();
-
 export function compileShader(gl, source, type) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);
@@ -31,7 +27,7 @@ export function compileProgram(gl, vertexSource, fragmentSource) {
   }
 }
 
-export function createTexture(gl, image) {
+export function createTexture(gl, textureObject) {
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texImage2D(
@@ -40,9 +36,13 @@ export function createTexture(gl, image) {
     gl.RGBA,          // internal format
     gl.RGBA,          // format
     gl.UNSIGNED_BYTE, // type
-    image,            // data
+    textureObject.image,            // data
   );
   gl.generateMipmap(gl.TEXTURE_2D);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl[textureObject.wrapS.description]);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl[textureObject.wrapT.description]);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl[textureObject.minFilter.description]);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl[textureObject.magFilter.description]);
   gl.bindTexture(gl.TEXTURE_2D, null);
   return texture;
 }

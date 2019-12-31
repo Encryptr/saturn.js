@@ -7,7 +7,10 @@ class Scene extends RenderObject {
   constructor() {
     super();
     this._background = new Color();
-    this._fog = new Fog();
+    this._ambientColor = new Color();
+    this._ambientIntensity = 0;
+    this._fogColor = new Color();
+    this._fogDensity = 0;
   }
   get isScene() {
     return true;
@@ -22,15 +25,21 @@ class Scene extends RenderObject {
       console.warn('Scene.js: (.set background) expected color to be of type SATURN.Color.');
     }
   }
-  get fog() {
-    return this._fog;
+  get ambientColor() {
+    return this._ambientColor;
   }
-  set fog(fog) {
-    if (fog.isFog) {
-      this._fog = fog;
+  set ambientColor(color) {
+    if (color.isColor) {
+      this._ambientColor = color;
     } else {
-      console.warn('Scene.js: (.set fog) expected fog to be of type SATURN.Fog.');
+      console.warn('Scene.js: (.set ambientColor) expected color to be of type SATURN.Color.');
     }
+  }
+  get ambientIntensity() {
+    return this._ambientIntensity;
+  }
+  set ambientIntensity(value) {
+    this._ambientIntensity = value;
   }
 }
 

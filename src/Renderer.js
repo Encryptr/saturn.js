@@ -1,7 +1,5 @@
 import * as ShaderUtil from './ShaderUtil.js';
 import { Cache } from './Cache.js';
-import { Texture } from './Texture.js';
-import { clamp } from './misc.js';
 
 // utility class for caching
 class ProgramInfo {
@@ -118,7 +116,7 @@ class Renderer {
   }
   _initTexture(texture) {
     console.info('Renderer.js: (._initTexture) created texture.');
-    this._textureCache.set(texture.id, ShaderUtil.createTexture(this._gl, texture.image));
+    this._textureCache.set(texture.id, ShaderUtil.createTexture(this._gl, texture));
     return this._textureCache.get(texture.id);
   }
   _initColor(color) {
@@ -129,16 +127,6 @@ class Renderer {
   _setProgram(scene, camera, material, object, lights) {
     
     let currentTextureUnit = 0;
-    
-    // update material state
-    /*if (material.isLambertMaterial || material.isPhongMaterial) {
-      if (this._state.numDirLights !== material.state.numDirLights)
-        material.state.numDirLights = this._state.numDirLights;
-      if (this._state.numPointLights !== material.state.numPointLights)
-        material.state.numPointLights = this._state.numPointLights;
-      if (this._state.numSpotLights !== material.state.numSpotLights)
-        material.state.numSpotLights = this._state.numSpotLights;
-    }*/
     
     if (material.isLambertMaterial || material.isPhongMaterial) {
       Object.assign(material.state, this._state);
@@ -165,11 +153,6 @@ class Renderer {
     this._gl.uniform1i(uniforms.u_texture, currentTextureUnit);
     this._gl.activeTexture(this._gl.TEXTURE0);
     
-    // clear previous texture
-    /*this._gl.deleteTexture(
-      this._gl.getParameter(this._gl.TEXTURE_BINDING_2D)
-    );*/
-    
     // bind new texture
     this._gl.bindTexture(this._gl.TEXTURE_2D, materialTexture);
     
@@ -178,6 +161,9 @@ class Renderer {
     
     // lights
     if (material.isLambertMaterial || material.isPhongMaterial) {
+      
+      this._gl.uniform3fv(uniforms.u_ambientColor, scene.ambientColor.copyIntoFloat32ArrayNormalized(this._vectorF32));
+      this._gl.uniform1f(uniforms.u_ambientIntensity, scene.ambientIntensity);
       
       const directionalLights = lights.filter(object => object.isDirectionalLight);
       const pointLights = lights.filter(object => object.isPointLight);

@@ -49,6 +49,8 @@ class PhongMaterial extends Material {
       'u_view',
       'u_projection',
       'u_texture',
+      'u_ambientColor',
+      'u_ambientIntensity',
       'u_shininess',
       'u_specularColor',
     ];

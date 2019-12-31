@@ -45,6 +45,8 @@ class LambertMaterial extends Material {
       'u_view',
       'u_projection',
       'u_texture',
+      'u_ambientColor',
+      'u_ambientIntensity',
     ];
   }
   get isLambertMaterial() {
