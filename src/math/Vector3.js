@@ -1,6 +1,6 @@
 import { Vector4 } from './Vector4.js';
 
-const _v4 = new Vector4();
+const _v4 = new Vector4(0, 0, 0, 1);
 
 class Vector3 {
   constructor(x = 0, y = 0, z = 0) { // => Vector3
@@ -62,9 +62,9 @@ class Vector3 {
     );
   }
   set(x, y, z) { // => Vector3
-    this._x = x || this._x;
-    this._y = y || this._y;
-    this._z = z || this._z;
+    this._x = (x !== undefined) ? x : this._x;
+    this._y = (y !== undefined) ? y : this._y;
+    this._z = (z !== undefined) ? z : this._z;
     return this;
   }
   equals(vector, tolerance = 0.001) { // => boolean
@@ -163,7 +163,9 @@ class Vector3 {
   }
   applyMatrix4(matrix) {
     if (matrix.isMatrix4) {
-      _v4.set(...this).applyMatrix4(matrix);
+      _v4.set(...this, 1).applyMatrix4(matrix);
+      
+      //console.log('v4: ', _v4);
       
       // divide by perspective
       this.x = _v4.x / _v4.w;

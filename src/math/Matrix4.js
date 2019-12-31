@@ -240,9 +240,10 @@ class Matrix4 {
   
   makeRotation(x, y, z) { // => Matrix4
     this.makeIdentity().multiply(
-      new Matrix4().makeRotationX(x),
-      new Matrix4().makeRotationY(y),
+      // extrinsic rotations - around world axes, not object axes
       new Matrix4().makeRotationZ(z),
+      new Matrix4().makeRotationY(y),
+      new Matrix4().makeRotationX(x),
     );
     return this;
   }

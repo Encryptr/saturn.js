@@ -63,10 +63,10 @@ class Vector4 {
     );
   }
   set(x, y, z, w) {
-    this._x = x || this._x;
-    this._y = y || this._y;
-    this._z = z || this._z;
-    this._w = w || this._w;
+    this._x = (x !== undefined) ? x : this._x;
+    this._y = (y !== undefined) ? y : this._y;
+    this._z = (z !== undefined) ? z : this._z;
+    this._w = (w !== undefined) ? w : this._w;
     return this;
   }
   equals(vector, tolerance = 0.001) {
@@ -147,10 +147,10 @@ class Vector4 {
   applyMatrix4(matrix) {
     if (matrix.isMatrix4) {
       const v = this.clone();
-      this.x = v.dot(matrix.col0);
-      this.y = v.dot(matrix.col1);
-      this.z = v.dot(matrix.col2);
-      this.w = v.dot(matrix.col3);
+      this.x = v.dot(matrix.row1);
+      this.y = v.dot(matrix.row2);
+      this.z = v.dot(matrix.row3);
+      this.w = v.dot(matrix.row4);
     } else {
       console.warn('Vector4.js: (.applyMatrix4) expected matrix to be of type SATURN.Matrix4.');
     }
