@@ -7,9 +7,20 @@ class Vector3 {
     this._x = x;
     this._y = y;
     this._z = z;
+    this._onchange = () => {};
   }
   get isVector3() { // => boolean
     return true;
+  }
+  get onchange() {
+    return this.onchange;
+  }
+  set onchange(func) {
+    if (typeof func === 'function') {
+      this._onchange = func;
+    } else {
+      console.warn('Vector3.js: (.set onchange) expected func to be of type function.');
+    }
   }
   toArray() {
     return [...this];
@@ -26,18 +37,21 @@ class Vector3 {
   }
   set x(value) { // => number
     this._x = value;
+    this._onchange();
   }
   get y() { // => number
     return this._y;
   }
   set y(value) { // => number
     this._y = value;
+    this._onchange();
   }
   get z() { // => number
     return this._z;
   }
   set z(value) { // => number
     this._z = value;
+    this._onchange();
   }
   get magnitude() { // => number
     return Math.sqrt(
@@ -51,6 +65,7 @@ class Vector3 {
       this._x = vector.x;
       this._y = vector.y;
       this._z = vector.z;
+      this._onchange();
     } else {
       console.warn('Vector3.js: (.copy) expected vector to be of type SATURN.Vector3.');
     }
@@ -65,6 +80,7 @@ class Vector3 {
     this._x = (x !== undefined) ? x : this._x;
     this._y = (y !== undefined) ? y : this._y;
     this._z = (z !== undefined) ? z : this._z;
+    this._onchange();
     return this;
   }
   equals(vector, tolerance = 0.001) { // => boolean
@@ -84,6 +100,7 @@ class Vector3 {
       this._x += vector.x;
       this._y += vector.y;
       this._z += vector.z;
+      this._onchange();
     } else {
       console.warn('Vector3.js: (._add) expected vector to be of type SATURN.Vector3.');
     }
@@ -94,6 +111,7 @@ class Vector3 {
       this._x -= vector.x;
       this._y -= vector.y;
       this._z -= vector.z;
+      this._onchange();
     } else {
       console.warn('Vector3.js: (._sub) expected vector to be of type SATURN.Vector3.');
     }
@@ -102,6 +120,7 @@ class Vector3 {
   add(...vectors) { // => Vector3
     if (vectors.every(vector => vector.isVector3)) {
       vectors.forEach(v => this._add(v));
+      this._onchange();
     } else {
       console.warn('Vector3.js: (.add) expected vectors to be of type SATURN.Vector3.');
     }
@@ -110,6 +129,7 @@ class Vector3 {
   sub(...vectors) { // => Vector3
     if (vectors.every(vector => vector.isVector3)) {
       vectors.forEach(v => this._sub(v));
+      this._onchange();
     } else {
       console.warn('Vector3.js: (.sub) expected vectors to be of type SATURN.Vector3.');
     }
@@ -119,6 +139,7 @@ class Vector3 {
     this._x *= s;
     this._y *= s;
     this._z *= s;
+    this._onchange();
     return this;
   }
   dot(vector) { // => number
@@ -139,6 +160,7 @@ class Vector3 {
       this._x = u.y * vector.z - u.z * vector.y;
       this._y = u.z * vector.x - u.x * vector.z;
       this._z = u.x * vector.y - u.y * vector.x;
+      this._onchange();
     } else {
       console.warn('Vector3.js: (.cross) expected vector to be of type SATURN.Vector3.');
     }
@@ -146,6 +168,7 @@ class Vector3 {
   }
   normalize() { // => Vector3
     this.scale(1/this.magnitude);
+    this._onchange();
     return this;
   }
   angleTo(vector) { // => number
@@ -171,6 +194,7 @@ class Vector3 {
       this.x = _v4.x / _v4.w;
       this.y = _v4.y / _v4.w;
       this.z = _v4.z / _v4.w;
+      this._onchange();
     } else {
       console.warn('Vector3.js: (.applyMatrix4) expected matrix to be of type SATURN.Matrix4.');
     }

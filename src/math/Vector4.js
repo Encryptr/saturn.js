@@ -4,9 +4,20 @@ class Vector4 {
     this._y = y;
     this._z = z;
     this._w = w;
+    this._onchange = () => {};
   }
   get isVector4() {
     return true;
+  }
+  get onchange() {
+    return this.onchange;
+  }
+  set onchange(func) {
+    if (typeof func === 'function') {
+      this._onchange = func;
+    } else {
+      console.warn('Vector4.js: (.set onchange) expected func to be of type function.');
+    }
   }
   toArray() {
     return [...this];
@@ -19,24 +30,28 @@ class Vector4 {
   }
   set x(value) {
     this._x = value;
+    this._onchange();
   }
   get y() {
     return this._y;
   }
   set y(value) {
     this._y = value;
+    this._onchange();
   }
   get z() {
     return this._z;
   }
   set z(value) {
     this._z = value;
+    this._onchange();
   }
   get w() {
     return this._w;
   }
   set w(value) {
     this._w = value;
+    this._onchange();
   }
   get magnitude() {
     return Math.sqrt(
@@ -52,6 +67,7 @@ class Vector4 {
       this._y = v.y;
       this._z = v.z;
       this._w = v.w;
+      this._onchange();
     } else {
       console.warn('Vector4.js: (.copy) expected vector to be of type SATURN.Vector4.');
     }
@@ -67,6 +83,7 @@ class Vector4 {
     this._y = (y !== undefined) ? y : this._y;
     this._z = (z !== undefined) ? z : this._z;
     this._w = (w !== undefined) ? w : this._w;
+    this._onchange();
     return this;
   }
   equals(vector, tolerance = 0.001) {
@@ -88,6 +105,7 @@ class Vector4 {
       this._y += v.y;
       this._z += v.z;
       this._w += v.w;
+      this._onchange();
     } else {
       console.warn('Vector4.js: (._add) expected vector to be of type SATURN.Vector4.');
     }
@@ -99,6 +117,7 @@ class Vector4 {
       this._y -= v.y;
       this._z -= v.z;
       this._w -= v.w;
+      this._onchange();
     } else {
       console.warn('Vector4.js: (._sub) expected vector to be of type SATURN.Vector4.');
     }
@@ -107,6 +126,7 @@ class Vector4 {
   add(...vectors) {
     if (vectors.every(vector => vector.isVector4)) {
       vectors.forEach(v => this.add(v));
+      this._onchange();
     } else {
       console.warn('Vector4.js: (.add) expected vectors to be of type SATURN.Vector4.');
     }
@@ -115,6 +135,7 @@ class Vector4 {
   sub(...vectors) {
     if (vectors.every(vector => vector.isVector4)) {
       vectors.forEach(v => this.sub(v));
+      this._onchange();
     } else {
       console.warn('Vector4.js: (.sub) expected vectors to be of type SATURN.Vector4.');
     }
@@ -125,6 +146,7 @@ class Vector4 {
     this._y *= s;
     this._z *= s;
     this._w *= s;
+    this._onchange();
     return this;
   }
   dot(vector) {
@@ -142,6 +164,7 @@ class Vector4 {
   }
   normalize() {
     this.scale(1/this.magnitude);
+    this._onchange();
     return this;
   }
   applyMatrix4(matrix) {
@@ -151,6 +174,7 @@ class Vector4 {
       this.y = v.dot(matrix.row2);
       this.z = v.dot(matrix.row3);
       this.w = v.dot(matrix.row4);
+      this._onchange();
     } else {
       console.warn('Vector4.js: (.applyMatrix4) expected matrix to be of type SATURN.Matrix4.');
     }
