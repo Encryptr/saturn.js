@@ -66,9 +66,9 @@ class Renderer {
     
     if (material.isLambertMaterial || material.isPhongMaterial) {
       for (let i = 1; i < material.state.numDirLights + 1; i++) {
-        uniforms[`directionalLights[${i}].direction`] = this._gl.getUniformLocation(program, `directionalLights[${i}].direction`);
-        uniforms[`directionalLights[${i}].color`] = this._gl.getUniformLocation(program, `directionalLights[${i}].color`);
-        uniforms[`directionalLights[${i}].intensity`] = this._gl.getUniformLocation(program, `directionalLights[${i}].intensity`);
+        uniforms[`dirLights[${i}].direction`] = this._gl.getUniformLocation(program, `dirLights[${i}].direction`);
+        uniforms[`dirLights[${i}].color`] = this._gl.getUniformLocation(program, `dirLights[${i}].color`);
+        uniforms[`dirLights[${i}].intensity`] = this._gl.getUniformLocation(program, `dirLights[${i}].intensity`);
       }
       for (let i = 1; i < material.state.numPointLights + 1; i++) {
         uniforms[`pointLights[${i}].position`] = this._gl.getUniformLocation(program, `pointLights[${i}].position`);
@@ -165,14 +165,14 @@ class Renderer {
       this._gl.uniform3fv(uniforms.u_ambientColor, scene.ambientColor.copyIntoFloat32ArrayNormalized(this._vectorF32));
       this._gl.uniform1f(uniforms.u_ambientIntensity, scene.ambientIntensity);
       
-      const directionalLights = lights.filter(object => object.isDirectionalLight);
+      const dirLights = lights.filter(object => object.isDirectionalLight);
       const pointLights = lights.filter(object => object.isPointLight);
       const spotLights = lights.filter(object => object.isSpotLight);
       
-      for (let i = 0; i < directionalLights.length; i++) {
-        this._gl.uniform3fv(uniforms[`directionalLights[${i+1}].direction`], directionalLights[i].direction.copyIntoFloat32Array(this._vectorF32));
-        this._gl.uniform3fv(uniforms[`directionalLights[${i+1}].color`], directionalLights[i].color.copyIntoFloat32ArrayNormalized(this._vectorF32));
-        this._gl.uniform1f(uniforms[`directionalLights[${i+1}].intensity`], directionalLights[i].intensity);
+      for (let i = 0; i < dirLights.length; i++) {
+        this._gl.uniform3fv(uniforms[`dirLights[${i+1}].direction`], dirLights[i].direction.copyIntoFloat32Array(this._vectorF32));
+        this._gl.uniform3fv(uniforms[`dirLights[${i+1}].color`], dirLights[i].color.copyIntoFloat32ArrayNormalized(this._vectorF32));
+        this._gl.uniform1f(uniforms[`dirLights[${i+1}].intensity`], dirLights[i].intensity);
       }
       for (let i = 0; i < pointLights.length; i++) {
         this._gl.uniform3fv(uniforms[`pointLights[${i+1}].position`], pointLights[i].position.copyIntoFloat32Array(this._vectorF32));
@@ -205,10 +205,10 @@ class Renderer {
     
     // update state
     const sceneAncestors =  scene.ancestors;
-    const lights = sceneAncestors.filter(object => object.isLight);
-    this._state.numDirLights = sceneAncestors.filter(object => object.isDirectionalLight).length;
-    this._state.numPointLights = sceneAncestors.filter(object => object.isPointLight).length;
-    this._state.numSpotLights = sceneAncestors.filter(object => object.isSpotLight).length;
+    const lights = scene.ancestors.filter(object => object.isLight);
+    this._state.numDirLights = lights.filter(object => object.isDirectionalLight).length;
+    this._state.numPointLights = lights.filter(object => object.isPointLight).length;
+    this._state.numSpotLights = lights.filter(object => object.isSpotLight).length;
     
     scene.traverseAncestors(object => {
       if (object.isMesh) {

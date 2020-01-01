@@ -1,28 +1,19 @@
 import { Vector3 } from './math/Vector3.js';
 import { Matrix4 } from './math/Matrix4.js';
 
-const _makeVectorHandler = (object) => ({
-  set(vector, component, value) {
-    Reflect.set(vector, component, value);
-    object.computeMatrices();
-    return true;
-  },
-});
-
 class RenderObject {
   constructor() {
-    const _vectorHandler = _makeVectorHandler(this);
+    const onchange = () => this.computeMatrices();
     
     // matrices
-    this._position = new Proxy(
-      new Vector3(0, 0, 0), _vectorHandler,
-    );
-    this._rotation = new Proxy(
-      new Vector3(0, 0, 0), _vectorHandler,
-    );
-    this._scale = new Proxy(
-      new Vector3(1, 1, 1), _vectorHandler,
-    );
+    this._position = new Vector3(0, 0, 0);
+    this._rotation = new Vector3(0, 0, 0);
+    this._scale = new Vector3(1, 1, 1);
+    
+    this._position.onchange = () => this.computeMatrices();
+    this._rotation.onchange = () => this.computeMatrices();
+    this._scale.onchange = () => this.computeMatrices();
+    
     this._localMatrix = new Matrix4();
     this._worldMatrix = new Matrix4();
     
@@ -40,7 +31,8 @@ class RenderObject {
   }
   set position(vector) {
     if (vector.isVector3) {
-      this._position.copy(vector);
+      this._position = vector;
+      this._position.onchange = () => this.computeMatrices;
     } else {
       console.warn('RenderObject.js: (.set position) expected vector to be of type SATURN.Vector3.');
     }
@@ -50,7 +42,8 @@ class RenderObject {
   }
   set rotation(vector) {
     if (vector.isVector3) {
-      this._rotation.copy(vector);
+      this._rotation = vector;
+      this._rotation.onchange = () => this.computeMatrices;
     } else {
       console.warn('RenderObject.js: (.set rotation) expected vector to be of type SATURN.Vector3.');
     }
@@ -60,7 +53,8 @@ class RenderObject {
   }
   set scale(vector) {
     if (vector.isVector3) {
-      this._scale.copy(vector);
+      this._scale = vector;
+      this._scale.onchange = () => this.computeMatrices;
     } else {
       console.warn('RenderObject.js: (.set scale) expected vector to be of type SATURN.Vector3.');
     }
