@@ -1,111 +1,138 @@
 export default (
 `#version 300 es
-
 precision mediump float;
 
+// LIGHT DATA
 #define NUM_DIR_LIGHTS 0
 #define NUM_POINT_LIGHTS 0
 #define NUM_SPOT_LIGHTS 0
 
-struct DirectionalLight {
+// DEFINES
+#define ZERO vec3(0, 0, 0)
+#define ONE vec3(1, 1, 1)
+
+// DIRECTIONAL LIGHT
+struct DirectionalLight
+{
   vec3 direction;
   vec3 color;
   float intensity;
 };
 
-struct PointLight {
+// POINT LIGHT
+struct PointLight
+{
   vec3 position;
   vec3 color;
   float intensity;
 };
 
-struct SpotLight {
+// SPOT LIGHT
+struct SpotLight
+{
   vec3 direction;
   vec3 position;
+  vec3 color;
+  float intensity;
   float innerLimit;
   float outerLimit;
-  float intensity;
-  vec3 color;
 };
 
+// VARYINGS/INPUTS
 in vec2 v_uv;
 in vec3 v_normal;
-in vec3 v_surfacePosition;
+in vec3 v_fragPosition;
 
+// UNIFORMS
 uniform sampler2D u_texture;
 uniform vec3 u_ambientColor;
 uniform float u_ambientIntensity;
-uniform DirectionalLight directionalLights[NUM_DIR_LIGHTS + 1];
+uniform DirectionalLight dirLights[NUM_DIR_LIGHTS + 1];
 uniform PointLight pointLights[NUM_POINT_LIGHTS + 1];
 uniform SpotLight spotLights[NUM_SPOT_LIGHTS + 1];
 
-out vec4 color;
+// FUNCTION DECLARATIONS
+// vec3 => (r, g, b)
+void calcDirLight(in DirectionalLight light, in vec3 normal, inout vec3 lightData);
+void calcPointLight(in PointLight light, in vec3 normal, inout vec3 lightData);
+void calcSpotLight(in SpotLight light, in vec3 normal, inout vec3 lightData);
 
-void main() {
+// SHADER OUTPUT
+out vec4 fragmentColor;
+
+// MAIN FUNCTION
+void main()
+{
   
-  color = texture(u_texture, v_uv);
+  // INITIALIZE SHADER OUTPUT
+  fragmentColor = texture(u_texture, v_uv);
   
+  // LIGHTING VARS
+  // lightData.xyz = light
+  vec3 totalLightData = vec3(0, 0, 0);
   vec3 normal = normalize(v_normal);
-  vec3 totalLight = vec3(0, 0, 0);
-  vec3 surfaceToLight = vec3(0, 0, 0);
   
-  totalLight += clamp(
+  for (int i = 1; i < NUM_DIR_LIGHTS + 1; i++)
+    calcDirLight(dirLights[ i ], normal, totalLightData);
+    
+  for (int i = 1; i < NUM_POINT_LIGHTS + 1; i++)
+    calcPointLight(pointLights[ i ], normal, totalLightData);
+  
+  for (int i = 1; i < NUM_SPOT_LIGHTS + 1; i++)
+    calcSpotLight(spotLights[ i ], normal, totalLightData);
+  
+  // APPLY AMBIENT TO LIGHT
+  totalLightData.xyz += clamp(
     u_ambientColor * u_ambientIntensity,
     vec3(0, 0, 0), vec3(1, 1, 1)
   );
   
-  for (int i = 1; i < NUM_DIR_LIGHTS+1; i++) {
-    
-    DirectionalLight light = directionalLights[i];
-    
-    vec3 diffuse = clamp(
-      dot(-light.direction, normal) * light.color * light.intensity,
-      vec3(0, 0, 0), vec3(1, 1, 1) // min/max light levels
-    );
-    
-    totalLight += diffuse;
-    
-  }
+  // APPLY LIGHTS TO SHADER OUTPUT
+  fragmentColor.rgb *= totalLightData.xyz;
   
-  for (int i = 1; i < NUM_POINT_LIGHTS+1; i++) {
-    
-    PointLight light = pointLights[i];
-    
-    surfaceToLight = normalize(light.position - v_surfacePosition);
-    
-    vec3 diffuse = clamp(
-      dot(surfaceToLight, normal) * light.color * light.intensity,
-      vec3(0, 0, 0), vec3(1, 1, 1) // min/max light levels
-    );
-    
-    totalLight += diffuse;
-    
-  }
+}
+
+// FUNCTION DEFINITIONS
+
+// DIRECTIONAL LIGHT CALCULATIONS
+void calcDirLight(in DirectionalLight light, in vec3 normal, inout vec3 lightData)
+{
+  // DIFFUSE
+  vec3 diffuse = clamp(
+    dot(-light.direction, normal) * light.color * light.intensity, ZERO, ONE
+  );
+  lightData.rgb += diffuse;
+}
+
+// POINT LIGHT CALCULATIONS
+void calcPointLight(in PointLight light, in vec3 normal, inout vec3 lightData)
+{
+  vec3 fragToLightDir = normalize(light.position - v_fragPosition);
   
-  for (int i = 1; i < NUM_SPOT_LIGHTS+1; i++) {
-    
-    SpotLight light = spotLights[i];
-    
-    surfaceToLight = normalize(light.position - v_surfacePosition);
-    
-    float dotFromDirection = dot(surfaceToLight, -light.direction);
-    
-    float inLight = smoothstep(
-      cos(light.outerLimit),
-      cos(light.innerLimit),
-      dotFromDirection
-    );
-    
-    vec3 diffuse = inLight * clamp(
-      dot(surfaceToLight, normal) * light.color * light.intensity,
-      vec3(0, 0, 0), vec3(1, 1, 1) // min/max light levels
-    );
-    
-    totalLight += diffuse;
-    
-  }
+  // DIFFUSE
+  vec3 diffuse = clamp(
+    dot(fragToLightDir, normal) * light.color * light.intensity, ZERO, ONE
+  );
+  lightData.rgb += diffuse;
+}
+
+// SPOT LIGHT CALCULATIONS
+void calcSpotLight(in SpotLight light, in vec3 normal, inout vec3 lightData)
+{
+  vec3 fragToLightDir = normalize(light.position - v_fragPosition);
   
-  color.rgb *= totalLight;
+  // lightCoefficient: 1 if inside inner-limit, 0-1 if between limits, 1 if outside outer-limit
+  float cosAngle = dot(fragToLightDir, -light.direction);
+  float lightCoefficient = smoothstep(
+    cos(light.outerLimit), // outer limit
+    cos(light.innerLimit), // inner limit
+    cosAngle
+  );
   
+  // DIFFUSE
+  vec3 diffuse = lightCoefficient * clamp(
+    dot(fragToLightDir, normal) * light.color * light.intensity, ZERO, ONE
+  );
+  lightData.rgb += diffuse;
 }`
 );
