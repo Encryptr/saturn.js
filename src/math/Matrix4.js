@@ -178,7 +178,7 @@ class Matrix4 {
     return this;
   }
   
-  makeIdentity() {
+  setIdentity() {
     this._elements = [
       1, 0, 0, 0,
       0, 1, 0, 0,
@@ -188,7 +188,7 @@ class Matrix4 {
     return this;
   }
   
-  makeScale(x, y, z) { // => Matrix4
+  setFromScale(x, y, z) { // => Matrix4
     this._elements = [
       x, 0, 0, 0,
       0, y, 0, 0,
@@ -198,7 +198,7 @@ class Matrix4 {
     return this;
   }
   
-  makeTranslation(x, y, z) { // => Matrix4
+  setFromTranslation(x, y, z) { // => Matrix4
     this._elements = [
       1, 0, 0, 0,
       0, 1, 0, 0,
@@ -208,7 +208,7 @@ class Matrix4 {
     return this;
   }
   
-  makeRotationX(t) { // => Matrix4
+  setFromRoll(t) { // => Matrix4
     this._elements = [
       1,            0,           0, 0,
       0,  Math.cos(t), Math.sin(t), 0,
@@ -218,7 +218,7 @@ class Matrix4 {
     return this;
   }
   
-  makeRotationY(t) { // => Matrix4
+  setFromPitch(t) { // => Matrix4
     this._elements = [
       Math.cos(t), 0, -Math.sin(t), 0,
                 0, 1,            0, 0,
@@ -228,7 +228,7 @@ class Matrix4 {
     return this;
   }
   
-  makeRotationZ(t) { // => Matrix4
+  setFromYaw(t) { // => Matrix4
     this._elements = [
        Math.cos(t), Math.sin(t), 0, 0,
       -Math.sin(t), Math.cos(t), 0, 0,
@@ -238,41 +238,41 @@ class Matrix4 {
     return this;
   }
   
-  makeRotation(x, y, z) { // => Matrix4
-    this.makeIdentity().multiply(
-      // extrinsic rotations - around world axes, not object axes
-      new Matrix4().makeRotationZ(z),
-      new Matrix4().makeRotationY(y),
-      new Matrix4().makeRotationX(x),
-    );
+  setFromEuler(roll, pitch, yaw, order) { // => Matrix4
+    this.setIdentity();
+    if (order === 'XYZ') {
+      this.multiply(
+        new Matrix4().setFromRoll(roll),
+        new Matrix4().setFromPitch(pitch),
+        new Matrix4().setFromYaw(yaw),
+      );
+    } else if (order === 'ZYX') {
+      this.multiply(
+        new Matrix4().setFromYaw(yaw),
+        new Matrix4().setFromPitch(pitch),
+        new Matrix4().setFromRoll(roll),
+      );
+    }
     return this;
   }
   
-  /*makeFromAxisAngle(axis, t) { // => Matrix4
-    // normalize the axis
-    const u = axis.clone().normalize();
-    const [sin, cos] = [Math.sin(t), Math.cos(t)];
-    this._elements = [
-      // column 1
-      cos + u.x ** 2 * (1 - cos),
-      u.y * u.x * (1 - cos) + u.z * sin,
-      u.z * u.x * (1 - cos) - u.y * sin,
-      0,
-      // column 2
-      u.x * u.y * (1 - cos) - u.z * sin,
-      cos + u.y ** 2 * (1 - cos),
-      u.z * u.y * (1 - cos) + u.x * sin,
-      0,
-      // column 3
-      u.x * u.z * (1 - cos) + u.y * sin,
-      u.y * u.z * (1 - cos) - u.x * sin,
-      cos + u.z ** 2 * (1 - cos),
-      0,
-      // column 4
-      0, 0, 0, 1,
-    ];
+  setFromQuaternion(quat) {
+    // quat is assumed to be a unit quaternion
+    if (quat.isQuaternion) {
+      //https://www.cprogramming.com/tutorial/3d/quaternions.html
+      const x = quat.x, y = quat.y, z = quat.z, w = quat.w;
+      const x2 = quat.x**2, y2 = quat.y**2, z2 = quat.z**2;
+      this._elements = [
+        1-2*y2-2*z2, 2*x*y+2*w*z, 2*x*z-2*w*y, 0,
+        2*x*y-2*w*z, 1-2*x2-2*z2, 2*y*z+2*w*x, 0,
+        2*x*z+2*w*y, 2*y*z-2*w*x, 1-2*x2-2*y2, 0,
+                  0,           0,           0, 1,
+      ];
+    } else {
+      console.warn('Matrix4.js: (.setFromQuaternion) expected quat to be of type SATURN.Quaternion.');
+    }
     return this;
-  }*/
+  }
   
   makeOrthographic(left, right, bottom, top, near, far) { // => Matrix4
     this._elements = [
@@ -299,10 +299,6 @@ class Matrix4 {
       0, 0, near * far * rangeInv * 2, 0,
     ];
     return this;
-  }
-  
-  static get IDENTITY() { // => Matrix4
-    return new Matrix4();
   }
   
   *[Symbol.iterator]() {

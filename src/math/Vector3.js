@@ -1,6 +1,10 @@
 import { Vector4 } from './Vector4.js';
+import { Quaternion } from './Quaternion.js';
 
 const _v4 = new Vector4(0, 0, 0, 1);
+const _q1 = new Quaternion(0, 0, 0, 1);
+const _q2 = new Quaternion(0, 0, 0, 1);
+const _q3 = new Quaternion(0, 0, 0, 1);
 
 class Vector3 {
   constructor(x = 0, y = 0, z = 0) { // => Vector3
@@ -13,7 +17,7 @@ class Vector3 {
     return true;
   }
   get onchange() {
-    return this.onchange;
+    return this._onchange;
   }
   set onchange(func) {
     if (typeof func === 'function') {
@@ -127,6 +131,7 @@ class Vector3 {
     return this;
   }
   sub(...vectors) { // => Vector3
+  console.log(vectors);
     if (vectors.every(vector => vector.isVector3)) {
       vectors.forEach(v => this._sub(v));
       this._onchange();
@@ -188,8 +193,6 @@ class Vector3 {
     if (matrix.isMatrix4) {
       _v4.set(...this, 1).applyMatrix4(matrix);
       
-      //console.log('v4: ', _v4);
-      
       // divide by perspective
       this.x = _v4.x / _v4.w;
       this.y = _v4.y / _v4.w;
@@ -197,6 +200,29 @@ class Vector3 {
       this._onchange();
     } else {
       console.warn('Vector3.js: (.applyMatrix4) expected matrix to be of type SATURN.Matrix4.');
+    }
+    return this;
+  }
+  applyQuaternion(quat) {
+    if (quat.isQuaternion) {
+      _q1.copy(quat);
+      _q2.set(this._x, this._y, this._z, 0);
+      _q3.copy(_q1.conjugate);
+      _q1.multiply(_q2).multiply(_q3);
+      this._x = _q1.x;
+      this._y = _q1.y;
+      this._z = _q1.z;
+    } else {
+      console.warn('Vector3.js: (.applyQuaternion) expected quat to be of type SATURN.Quaternion');
+    }
+    return this;
+  }
+  rotateOnAxis(axis, angle) {
+    if (axis.isVector3) {
+      _q1.setFromAxisAngle(axis, angle);
+      this.applyQuaternion(_q1);
+    } else {
+      console.warn('Vector3.js: (.rotateOnAxis) expected axis to be of type SATURN.Vector3.');
     }
     return this;
   }
