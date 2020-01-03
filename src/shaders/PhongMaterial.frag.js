@@ -15,16 +15,14 @@ precision mediump float;
 struct DirectionalLight
 {
   vec3 direction;
-  vec3 color;
-  float intensity;
+  vec4 ci;
 };
 
 // POINT LIGHT
 struct PointLight
 {
   vec3 position;
-  vec3 color;
-  float intensity;
+  vec4 ci;
 };
 
 // SPOT LIGHT
@@ -32,10 +30,8 @@ struct SpotLight
 {
   vec3 direction;
   vec3 position;
-  vec3 color;
-  float intensity;
-  float innerLimit;
-  float outerLimit;
+  vec4 ci;
+  float limit;
 };
 
 // VARYINGS/INPUTS
@@ -104,7 +100,7 @@ void calcDirLight(in DirectionalLight light, in vec3 normal, in vec3 fragToViewD
 {
   // DIFFUSE
   vec3 diffuse = clamp(
-    dot(-light.direction, normal) * light.color * light.intensity, ZERO, ONE
+    dot(-light.direction, normal) * light.ci.rgb * light.ci.w, ZERO, ONE
   );
   lightData.rgb += diffuse;
   
@@ -121,7 +117,7 @@ void calcPointLight(in PointLight light, in vec3 normal, in vec3 fragToViewDir, 
   
   // DIFFUSE
   vec3 diffuse = clamp(
-    dot(fragToLightDir, normal) * light.color * light.intensity, ZERO, ONE
+    dot(fragToLightDir, normal) * light.ci.rgb * light.ci.w, ZERO, ONE
   );
   lightData.rgb += diffuse;
   
@@ -139,14 +135,14 @@ void calcSpotLight(in SpotLight light, in vec3 normal, in vec3 fragToViewDir, in
   // lightCoefficient: 1 if inside inner-limit, 0-1 if between limits, 1 if outside outer-limit
   float cosAngle = dot(fragToLightDir, -light.direction);
   float lightCoefficient = smoothstep(
-    cos(light.outerLimit), // outer limit
-    cos(light.innerLimit), // inner limit
+    cos(light.limit + 0.05), // outer limit
+    cos(light.limit), // inner limit
     cosAngle
   );
   
   // DIFFUSE
   vec3 diffuse = lightCoefficient * clamp(
-    dot(fragToLightDir, normal) * light.color * light.intensity, ZERO, ONE
+    dot(fragToLightDir, normal) * light.ci.rgb * light.ci.w, ZERO, ONE
   );
   lightData.rgb += diffuse;
   
