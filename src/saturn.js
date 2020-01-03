@@ -1,6 +1,8 @@
 export { Matrix4 } from './math/Matrix4.js';
 export { Vector4 } from './math/Vector4.js';
 export { Vector3 } from './math/Vector3.js';
+export { Euler } from './math/Euler.js';
+export { Quaternion } from './math/Quaternion.js';
 export { RenderObject } from './RenderObject.js';
 export { Scene } from './Scene.js';
 export { Attribute } from './Attribute.js';

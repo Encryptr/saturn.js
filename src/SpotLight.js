@@ -17,7 +17,7 @@ class SpotLight extends Light {
   }
   set direction(vector) {
     if (vector.isVector3) {
-      this._direction.copy = vector;
+      this._direction = vector;
     } else {
       console.warn('SpotLight.js: (.set direction) expected vector to be of type SATURN.Vector3.');
     }

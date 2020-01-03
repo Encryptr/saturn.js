@@ -1,5 +1,13 @@
 import { Vector3 } from './math/Vector3.js';
 import { Matrix4 } from './math/Matrix4.js';
+import { Euler } from './math/Euler.js';
+import { Quaternion } from './math/Quaternion.js';
+import { XYZ } from './constants.js';
+
+const _xAxis = new Vector3(1, 0, 0);
+const _yAxis = new Vector3(0, 1, 0);
+const _zAxis = new Vector3(0, 0, 1);
+const _q1 = new Quaternion(0, 0, 0, 1);
 
 class RenderObject {
   constructor() {
@@ -7,11 +15,11 @@ class RenderObject {
     
     // matrices
     this._position = new Vector3(0, 0, 0);
-    this._rotation = new Vector3(0, 0, 0);
+    this._quaternion = new Quaternion(0, 0, 0, 1);
     this._scale = new Vector3(1, 1, 1);
     
     this._position.onchange = () => this.computeMatrices();
-    this._rotation.onchange = () => this.computeMatrices();
+    this._quaternion.onchange =  () => this.computeMatrices();
     this._scale.onchange = () => this.computeMatrices();
     
     this._localMatrix = new Matrix4();
@@ -32,20 +40,22 @@ class RenderObject {
   set position(vector) {
     if (vector.isVector3) {
       this._position = vector;
-      this._position.onchange = () => this.computeMatrices;
+      this._position.onchange = () => this.computeMatrices();
+      this._position.onchange();
     } else {
       console.warn('RenderObject.js: (.set position) expected vector to be of type SATURN.Vector3.');
     }
   }
-  get rotation() {
-    return this._rotation;
+  get quaternion() {
+    return this._quaternion;
   }
-  set rotation(vector) {
-    if (vector.isVector3) {
-      this._rotation = vector;
-      this._rotation.onchange = () => this.computeMatrices;
+  set quaternion(quat) {
+    if (quaternion.isQuaternion) {
+      this._quaternion = quat;
+      this._quaternion.onchange = () => this.computeMatrices();
+      this._quaternion.onchange;
     } else {
-      console.warn('RenderObject.js: (.set rotation) expected vector to be of type SATURN.Vector3.');
+      console.warn('RenderObject.js: (.set quaternion) expected quat to be of type SATURN.Quaternion.');
     }
   }
   get scale() {
@@ -54,7 +64,8 @@ class RenderObject {
   set scale(vector) {
     if (vector.isVector3) {
       this._scale = vector;
-      this._scale.onchange = () => this.computeMatrices;
+      this._scale.onchange = () => this.computeMatrices();
+      this._scale.onchange();
     } else {
       console.warn('RenderObject.js: (.set scale) expected vector to be of type SATURN.Vector3.');
     }
@@ -66,10 +77,10 @@ class RenderObject {
     return this._worldMatrix;
   }
   computeLocalMatrix() {
-    this._localMatrix.makeIdentity().multiply(
-      new Matrix4().makeTranslation(...this._position),
-      new Matrix4().makeRotation(...this._rotation),
-      new Matrix4().makeScale(...this._scale),
+    this._localMatrix.setIdentity().multiply(
+      new Matrix4().setFromTranslation(...this._position),
+      new Matrix4().setFromQuaternion(this._quaternion),
+      new Matrix4().setFromScale(...this._scale),
     );
     return this;
   }
@@ -77,7 +88,7 @@ class RenderObject {
     if (this._parent === null) {
       this._worldMatrix.copy(this._localMatrix);
     } else {
-      this._worldMatrix.makeIdentity().multiply(
+      this._worldMatrix.setIdentity().multiply(
         this._parent.worldMatrix, this._localMatrix,
       );
     }
@@ -87,6 +98,86 @@ class RenderObject {
   computeMatrices() {
     this.computeLocalMatrix();
     this.computeWorldMatrix();
+  }
+  
+  rotateOnAxis(axis, t) {
+    if (axis.isVector3) {
+      _q1.setFromAxisAngle(axis, t);
+      this._quaternion.multiply(_q1);
+    } else {
+      console.warn('RenderObject.js: (.rotateOnAxis) expected axis to be of type SATURN.Vector3');
+    }
+  }
+  rotateOnWorldAxis(axis, t) {
+    if (axis.isVector3) {
+      _q1.setFromAxisAngle(axis, t);
+      this._quaternion.premultiply(_q1);
+    } else {
+      console.warn('RenderObject.js: (.rotateOnWorldAxis) expected axis to be of type SATURN.Vector3');
+    }
+  }
+  
+  rotateX(t) {
+    _q1.setFromAxisAngle(_xAxis, t);
+    this._quaternion.multiply(_q1);
+    return this;
+  }
+  rotateY(t) {
+    _q1.setFromAxisAngle(_yAxis, t);
+    this._quaternion.multiply(_q1);
+    return this;
+  }
+  rotateZ(t) {
+    _q1.setFromAxisAngle(_zAxis, t);
+    this._quaternion.multiply(_q1);
+    return this;
+  }
+  rotateXYZ(x, y, z) {
+    this
+      .rotateX(x)
+      .rotateY(y)
+      .rotateZ(z);
+    return this;
+  }
+  
+  translateX(x) {
+    this._position.x += x;
+    return this;
+  }
+  translateY(y) {
+    this._position.y += y;
+    return this;
+  }
+  translateZ(z) {
+    this._position.z += z;
+    return this;
+  }
+  translateXYZ(x, y, z) {
+    this
+      .translateX(x)
+      .translateY(y)
+      .translateZ(z);
+    return this;
+  }
+  
+  scaleX(s) {
+    this._scale.x *= s;
+    return this;
+  }
+  scaleY(s) {
+    this._scale.y *= s;
+    return this;
+  }
+  scaleZ(s) {
+    this._scale.z *= s;
+    return this;
+  }
+  scaleXYZ(x, y, z) {
+    this
+      .scaleX(x)
+      .scaleY(y)
+      .scaleZ(z);
+    return this;
   }
   
   // scenegraph

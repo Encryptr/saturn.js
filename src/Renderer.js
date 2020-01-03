@@ -67,21 +67,17 @@ class Renderer {
     if (material.isLambertMaterial || material.isPhongMaterial) {
       for (let i = 1; i < material.state.numDirLights + 1; i++) {
         uniforms[`dirLights[${i}].direction`] = this._gl.getUniformLocation(program, `dirLights[${i}].direction`);
-        uniforms[`dirLights[${i}].color`] = this._gl.getUniformLocation(program, `dirLights[${i}].color`);
-        uniforms[`dirLights[${i}].intensity`] = this._gl.getUniformLocation(program, `dirLights[${i}].intensity`);
+        uniforms[`dirLights[${i}].ci`] = this._gl.getUniformLocation(program, `dirLights[${i}].ci`);
       }
       for (let i = 1; i < material.state.numPointLights + 1; i++) {
         uniforms[`pointLights[${i}].position`] = this._gl.getUniformLocation(program, `pointLights[${i}].position`);
-        uniforms[`pointLights[${i}].color`] = this._gl.getUniformLocation(program, `pointLights[${i}].color`);
-        uniforms[`pointLights[${i}].intensity`] = this._gl.getUniformLocation(program, `pointLights[${i}].intensity`);
+        uniforms[`pointLights[${i}].ci`] = this._gl.getUniformLocation(program, `pointLights[${i}].ci`);
       }
       for (let i = 1; i < material.state.numSpotLights + 1; i++) {
         uniforms[`spotLights[${i}].direction`] = this._gl.getUniformLocation(program, `spotLights[${i}].direction`);
-        uniforms[`spotLights[${i}].color`] = this._gl.getUniformLocation(program, `spotLights[${i}].color`);
-        uniforms[`spotLights[${i}].intensity`] = this._gl.getUniformLocation(program, `spotLights[${i}].intensity`);
+        uniforms[`spotLights[${i}].ci`] = this._gl.getUniformLocation(program, `spotLights[${i}].ci`);
         uniforms[`spotLights[${i}].position`] = this._gl.getUniformLocation(program, `spotLights[${i}].position`);
-        uniforms[`spotLights[${i}].innerLimit`] = this._gl.getUniformLocation(program, `spotLights[${i}].innerLimit`);
-        uniforms[`spotLights[${i}].outerLimit`] = this._gl.getUniformLocation(program, `spotLights[${i}].outerLimit`);
+        uniforms[`spotLights[${i}].limit`] = this._gl.getUniformLocation(program, `spotLights[${i}].limit`);
       }
     }
     
@@ -170,22 +166,18 @@ class Renderer {
       const spotLights = lights.filter(object => object.isSpotLight);
       
       for (let i = 0; i < dirLights.length; i++) {
-        this._gl.uniform3fv(uniforms[`dirLights[${i+1}].direction`], dirLights[i].direction.copyIntoFloat32Array(this._vectorF32));
-        this._gl.uniform3fv(uniforms[`dirLights[${i+1}].color`], dirLights[i].color.copyIntoFloat32ArrayNormalized(this._vectorF32));
-        this._gl.uniform1f(uniforms[`dirLights[${i+1}].intensity`], dirLights[i].intensity);
+        this._gl.uniform3fv(uniforms[`dirLights[${i+1}].direction`], dirLights[i].direction.clone().normalize().copyIntoFloat32Array(this._vectorF32));
+        this._gl.uniform4fv(uniforms[`dirLights[${i+1}].ci`], dirLights[i]._ci);
       }
       for (let i = 0; i < pointLights.length; i++) {
         this._gl.uniform3fv(uniforms[`pointLights[${i+1}].position`], pointLights[i].position.copyIntoFloat32Array(this._vectorF32));
-        this._gl.uniform3fv(uniforms[`pointLights[${i+1}].color`], pointLights[i].color.copyIntoFloat32ArrayNormalized(this._vectorF32));
-        this._gl.uniform1f(uniforms[`pointLights[${i+1}].intensity`], pointLights[i].intensity);
+        this._gl.uniform4fv(uniforms[`pointLights[${i+1}].ci`], pointLights[i]._ci);
       }
       for (let i = 0; i < spotLights.length; i++) {
-        this._gl.uniform3fv(uniforms[`spotLights[${i+1}].direction`], spotLights[i].direction.copyIntoFloat32Array(this._vectorF32));
-        this._gl.uniform3fv(uniforms[`spotLights[${i+1}].color`], spotLights[i].color.copyIntoFloat32ArrayNormalized(this._vectorF32));
-        this._gl.uniform1f(uniforms[`spotLights[${i+1}].intensity`], spotLights[i].intensity);
+        this._gl.uniform3fv(uniforms[`spotLights[${i+1}].direction`], spotLights[i].direction.clone().normalize().copyIntoFloat32Array(this._vectorF32));
+        this._gl.uniform4fv(uniforms[`spotLights[${i+1}].ci`], spotLights[i]._ci);
         this._gl.uniform3fv(uniforms[`spotLights[${i+1}].position`], spotLights[i].position.copyIntoFloat32Array(this._vectorF32));
-        this._gl.uniform1f(uniforms[`spotLights[${i+1}].innerLimit`], spotLights[i].limit);
-        this._gl.uniform1f(uniforms[`spotLights[${i+1}].outerLimit`], spotLights[i].limit + 0.05);
+        this._gl.uniform1f(uniforms[`spotLights[${i+1}].limit`], spotLights[i].limit);
       }
     }
     

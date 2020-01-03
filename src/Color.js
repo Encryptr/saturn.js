@@ -11,13 +11,13 @@ class Color {
     return true;
   }
   get onchange() {
-    return this.onchange;
+    return this._onchange;
   }
   set onchange(func) {
     if (typeof func === 'function') {
       this._onchange = func;
     } else {
-      console.warn('Vector3.js: (.set onchange) expected func to be of type function.');
+      console.warn('Color.js: (.set onchange) expected func to be of type function.');
     }
   }
   get colorId() {
