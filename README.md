@@ -30,3 +30,7 @@ Maintained by saaaji.
   - `GLTFLoader`
   - `AmbientLight`
   - `Shadow` (???)
+
+## Images:
+*800 Phong-shaded cubes*
+![8000 Phong-shaded cubes](./preview2.png)
