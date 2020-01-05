@@ -5,6 +5,8 @@
 Small 3D library built on WebGL 2.0.
 Maintained by saaaji.
 
+**Note to Developers:** *the frustum culling system has not been finalized and objects may disappear before they are offscreen*
+
 ## Completed Features:
   - `Renderer`
   - `Material`
