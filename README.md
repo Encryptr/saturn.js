@@ -5,10 +5,9 @@
 Small 3D library built on WebGL 2.0.
 Maintained by saaaji.
 
-**Note to Developers:** *the frustum culling system has not been finalized and objects may disappear before they are offscreen*
-
 ## Completed Features:
-  - `Renderer`
+  - ~~`Renderer`~~
+  - `WebGL2Renderer`
   - `Material`
   - `FlatMaterial`
   - `LambertMaterial`
@@ -32,7 +31,3 @@ Maintained by saaaji.
   - `GLTFLoader`
   - `AmbientLight`
   - `Shadow` (???)
-
-## Images:
-*800 Phong-shaded cubes*
-![8000 Phong-shaded cubes](./preview2.png)
