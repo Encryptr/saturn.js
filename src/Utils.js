@@ -1,0 +1,1 @@
+export { clamp } from './misc.js';

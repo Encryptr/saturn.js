@@ -12,32 +12,6 @@ class LambertMaterial extends Material {
     super();
     this._color = color;
     this._texture = texture;
-    
-    this._state = new Proxy({
-      numDirLights: 0,
-      numPointLights: 0,
-      numSpotLights: 0,
-    }, {
-      set: (object, key, value) => {
-        if (object[key] !== value) {
-          Reflect.set(object, key, value);
-          
-          // update define headers
-          this._fragmentShader = this._fragmentShader.replace(
-            /#define NUM_DIR_LIGHTS \d+/g, `#define NUM_DIR_LIGHTS ${this._state.numDirLights}`
-          ).replace(
-            /#define NUM_POINT_LIGHTS \d+/g, `#define NUM_POINT_LIGHTS ${this._state.numPointLights}`
-          ).replace(
-            /#define NUM_SPOT_LIGHTS \d+/g, `#define NUM_SPOT_LIGHTS ${this._state.numSpotLights}`
-          );
-          
-          // reset id
-          this._id = generateKey();
-        }
-        return true;
-      }
-    });
-    
     this._vertexShader = vertexShader;
     this._fragmentShader = fragmentShader;
     this._uniforms = [
@@ -51,9 +25,6 @@ class LambertMaterial extends Material {
   }
   get isLambertMaterial() {
     return true;
-  }
-  get state() {
-    return this._state;
   }
   get color() {
     return this._color;

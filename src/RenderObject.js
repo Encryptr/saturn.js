@@ -28,9 +28,17 @@ class RenderObject {
     // scenegraph
     this._parent = null;
     this._children = [];
+    
+    this._frustumCulled = true;
   }
   get isRenderObject() {
     return true;
+  }
+  get frustumCulled() {
+    return this._frustumCulled;
+  }
+  set frustumCulled(boolean) {
+    this._frustumCulled = boolean;
   }
   
   // matrices
@@ -53,7 +61,7 @@ class RenderObject {
     if (quaternion.isQuaternion) {
       this._quaternion = quat;
       this._quaternion.onchange = () => this.computeMatrices();
-      this._quaternion.onchange;
+      this._quaternion.onchange();
     } else {
       console.warn('RenderObject.js: (.set quaternion) expected quat to be of type SATURN.Quaternion.');
     }
