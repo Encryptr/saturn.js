@@ -21,8 +21,9 @@ class Matrix4 {
     return [...this._elements];
   }
   
-  toFloat32Array() { // => Float32Array
-    return new Float32Array(this._elements);
+  toFloat32Array(target = new Float32Array(16)) { // => Float32Array
+    target.set(this._elements);
+    return target;
   }
   
   copyIntoFloat32Array(typedArray) {

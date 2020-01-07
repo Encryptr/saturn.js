@@ -136,9 +136,9 @@ class Quaternion {
       const q1x = q1.x, q1y = q1.y, q1z = q1.z, q1w = q1.w;
       const q2x = q2.x, q2y = q2.y, q2z = q2.z, q2w = q2.w;
       this._x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-		  this._y = q1y * q2w + q1w * q2y + q1z * q2x - q1x * q2z;
-		  this._z = q1z * q2w + q1w * q2z + q1x * q2y - q1y * q2x;
-		  this._w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
+      this._y = q1y * q2w + q1w * q2y + q1z * q2x - q1x * q2z;
+      this._z = q1z * q2w + q1w * q2z + q1x * q2y - q1y * q2x;
+      this._w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
       this._onchange();
     } else {
       console.warn('Quaternion.js (.setFromProduct) expected q1 and q2 to be of type SATURN.Quaternion.');
