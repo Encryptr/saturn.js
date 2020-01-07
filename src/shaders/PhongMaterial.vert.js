@@ -5,9 +5,12 @@ layout (location = 0) in vec4 a_position;
 layout (location = 1) in vec2 a_uv;
 layout (location = 2) in vec3 a_normal;
 
+layout (std140) uniform Matrices {
+  mat4 u_projection;
+  mat4 u_view;
+};
+
 uniform mat4 u_model;
-uniform mat4 u_view;
-uniform mat4 u_projection;
 
 out vec2 v_uv;
 out vec3 v_normal;
