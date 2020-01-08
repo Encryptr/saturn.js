@@ -1,19 +1,20 @@
 import { Vector4 } from './Vector4.js';
 import { Quaternion } from './Quaternion.js';
 
-// utilities
-const _v4 = new Vector4(0, 0, 0, 1);
-const _q1 = new Quaternion(0, 0, 0, 1);
-const _q2 = new Quaternion(0, 0, 0, 1);
-const _q3 = new Quaternion(0, 0, 0, 1);
+let _v4 = new Vector4(0, 0, 0, 1);
+let _q1 = new Quaternion(0, 0, 0, 1);
+let _q2 = new Quaternion(0, 0, 0, 1);
+let _q3 = new Quaternion(0, 0, 0, 1);
 
-class Vector3 {
-  constructor(x = 0, y = 0, z = 0) { // => Vector3
+export class Vector3 {
+  constructor(x = 0, y = 0, z = 0) {
     this._x = x;
     this._y = y;
     this._z = z;
     this._onchange = () => {};
   }
+  
+  // Methods
   toArray() {
     return [...this];
   }
@@ -21,247 +22,220 @@ class Vector3 {
     target.set(this.toArray());
     return target;
   }
-  copy(vector) { // => Vector3
-    if (vector.isVector3) {
-      
-      this._x = vector.x;
-      this._y = vector.y;
-      this._z = vector.z;
-      this._onchange();
-      return this;
-      
-    } else throw new Error(
-      `SATURN.Vector3: .copy() expected 'vector' to inherit from SATURN.Vector3.`);
+  copy(vector) {
+    this._x = vector.x;
+    this._y = vector.y;
+    this._z = vector.z;
+    
+    this._onchange();
+    return this;
   }
-  clone() { // => Vector3
-    return new Vector3(
-      this._x, this._y, this._z,
-    );
+  clone() {
+    return new Vector3(this._x, this._y, this._z);
   }
-  set(x, y, z) { // => Vector3
+  set(x, y, z) {
     this._x = (x !== undefined) ? x : this._x;
     this._y = (y !== undefined) ? y : this._y;
     this._z = (z !== undefined) ? z : this._z;
+    
     this._onchange();
     return this;
   }
-  equals(vector, tolerance = 0.001) { // => boolean
-    if (vector.isVector3) {
-      
-      return (
-        (Math.abs(this._x - vector.x) < tolerance) &&
-        (Math.abs(this._y - vector.y) < tolerance) &&
-        (Math.abs(this._z - vector.z) < tolerance)
-      );
-      
-    } else throw new Error(
-      `SATURN.Vector3: .equals() expected 'vector' to inherit from SATURN.Vector3.`);
+  equals(vector, tolerance = 0.001) {
+    return (
+      (Math.abs(this._x - vector.x) < tolerance) &&
+      (Math.abs(this._y - vector.y) < tolerance) &&
+      (Math.abs(this._z - vector.z) < tolerance)
+    );
   }
-  _add(vector) { // => Vector3
-    if (vector.isVector3) {
-      
+  add(vector) {
       this._x += vector.x;
       this._y += vector.y;
       this._z += vector.z;
+      
       this._onchange();
       return this;
-      
-    } else throw new Error(
-      `SATURN.Vector3: ._add() expected 'vector' to inherit from SATURN.Vector3.`);
   }
-  _sub(vector) { // => Vector3
-    if (vector.isVector3) {
-      
-      this._x -= vector.x;
-      this._y -= vector.y;
-      this._z -= vector.z;
-      this._onchange();
-      return this;
-      
-    } else throw new Error(
-      `SATURN.Vector3: ._sub() expected 'vector' to inherit from SATURN.Vector3.`);
-  }
-  add(...vectors) { // => Vector3
-    if (vectors.every(vector => vector.isVector3)) {
-      
-      vectors.forEach(v => this._add(v));
-      this._onchange();
-      return this;
-      
-    } else throw new Error(
-      `SATURN.Vector3: .add() expected 'vectors' to inherit from SATURN.Vector3.`);
-  }
-  sub(...vectors) { // => Vector3
-    if (vectors.every(vector => vector.isVector3)) {
-      
-      vectors.forEach(v => this._sub(v));
-      this._onchange();
-      return this;
-      
-    } else throw new Error(
-      `SATURN.Vector3: .sub() expected 'vectors' inherit from SATURN.Vector3.`);
-  }
-  scale(s) { // => Vector3
-    this._x *= s;
-    this._y *= s;
-    this._z *= s;
+  sub(vector) {
+    this._x -= vector.x;
+    this._y -= vector.y;
+    this._z -= vector.z;
+    
     this._onchange();
     return this;
   }
-  dot(vector) { // => number
-    if (vector.isVector3) {
-      
-      return (
-        this._x * vector.x +
-        this._y * vector.y +
-        this._z * vector.z
-      );
-      
-    } else throw new Error(
-      `SATURN.Vector3: .dot() expected 'vector' to inherit from SATURN.Vector3.`);
+  scale(scalar) {
+    this._x *= scalar;
+    this._y *= scalar;
+    this._z *= scalar;
+    
+    this._onchange();
+    return this;
   }
-  cross(vector) { // => Vector3
-    if (vector.isVector3) {
-      
-      const u = this.clone();
-      this._x = u.y * vector.z - u.z * vector.y;
-      this._y = u.z * vector.x - u.x * vector.z;
-      this._z = u.x * vector.y - u.y * vector.x;
-      this._onchange();
-      return this;
-      
-    } else throw new Error(
-      `SATURN.Vector3: .cross() expected 'vector' to inherit from SATURN.Vector3.`);
+  dot(vector) {
+    return (
+      this._x * vector.x +
+      this._y * vector.y +
+      this._z * vector.z
+    );
   }
-  normalize() { // => Vector3
+  cross(vector) {
+    const x = this._x, y = this._y, z = this._z;
+    
+    this._x = y * vector.z - z * vector.y;
+    this._y = z * vector.x - x * vector.z;
+    this._z = x * vector.y - y * vector.x;
+    
+    this._onchange();
+    return this;
+  }
+  normalize() {
     this.scale(1 / this.magnitude);
+    
     this._onchange();
     return this;
   }
-  angleTo(vector) { // => number
-    if (vector.isVector3) {
-      
-      // a . b == cos(t)
-      const [u, v] = [
-        this.clone().normalize(),
-        vector.clone().normalize(),
-      ];
-      return Math.acos(u.dot(v));
-      
-    } else throw new Error(
-      `SATURN.Vector3: .angleTo() expected 'vector' to inherit from SATURN.Vector3.`);
+  angleTo(vector) {
+    const u = this.clone().normalize();
+    const v = vector.clone().normalize();
+    return Math.acos(u.dot(v));
   }
   distanceTo(vector) {
-    if (vector.isVector3) {
-      
-      const difference = vector.clone()._sub(this);
-      return difference.magnitude;
-      
-    } else throw new Error(
-      `SATURN.Vector3: .distanceTo() expected 'vector' to inherit from SATURN.Vector3.`);
+    const difference = vector.clone().sub(this);
+    return difference.magnitude;
   }
   distanceToSquared(vector) {
-    if (vector.isVector3) {
-      
-      const difference = vector.clone()._sub(this);
-      return difference.magnitudeSq;
-      
-    } else throw new Error(
-      `SATURN.Vector3: .distanceToSquared() expected 'vector' to inherit from SATURN.Vector3.`);
+    const difference = vector.clone()._sub(this);
+    return difference.magnitudeSquared;
   }
   applyMatrix4(matrix) {
-    if (matrix.isMatrix4) {
-      
-      _v4.set(...this, 1).applyMatrix4(matrix);
-      // divide by perspective
-      this.x = _v4.x / _v4.w;
-      this.y = _v4.y / _v4.w;
-      this.z = _v4.z / _v4.w;
-      this._onchange();
-      return this;
-      
-    } else throw new Error(
-      `SATURN.Vector3: .applyMatrix4() expected 'matrix' to inherit from SATURN.Matrix4.`);
+    _v4.set(...this, 1).applyMatrix4(matrix);
+    
+    // divide by perspective
+    this.x = _v4.x / _v4.w;
+    this.y = _v4.y / _v4.w;
+    this.z = _v4.z / _v4.w;
+    
+    this._onchange();
+    return this;
   }
-  applyQuaternion(quat) {
-    if (quat.isQuaternion) {
-      
-      _q1.copy(quat);
-      _q2.set(this._x, this._y, this._z, 0);
-      _q3.copy(_q1.conjugate);
-      _q1.multiply(_q2).multiply(_q3);
-      this._x = _q1.x;
-      this._y = _q1.y;
-      this._z = _q1.z;
-      this._onchange();
-      return this;
-      
-    } else throw new Error(
-      `SATURN.Vector3: .applyQuaternion() expected 'quat' to inherit from SATURN.Quaternion.`);
+  applyQuaternion(quaternion) {
+    _q1.copy(quaternion);
+    _q2.set(this._x, this._y, this._z, 0);
+    
+    _q3 = Quaternion.Multiply(_q1, _q2, _q1.conjugate);
+    this._x = _q3.x;
+    this._y = _q3.y;
+    this._z = _q3.z;
+    
+    this._onchange();
+    return this;
   }
   rotateOnAxis(axis, angle) {
-    if (axis.isVector3) {
-      
-      _q1.setFromAxisAngle(axis, angle);
-      this.applyQuaternion(_q1);
-      this._onchange();
-      return this;
-      
-    } else throw new Error(
-      `SATURN.Vector3: .rotateOnAxis() expected 'axis' to inherit from SATURN.Vector3.`);
+    _q1.setFromAxisAngle(axis, angle);
+    this.applyQuaternion(_q1);
+    
+    this._onchange();
+    return this;
   }
   *[Symbol.iterator]() {
     yield this._x;
     yield this._y;
     yield this._z;
   }
-  get isVector3() { // => boolean
+  
+  // Static Methods
+  static Add(a, b) {
+    return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
+  }
+  static Sub(a, b) {
+    return new Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
+  }
+  static Cross(a, b) {
+    return new Vector3(
+      a.y * b.z - a.z * b.y,
+      a.z * b.x - a.x * b.z,
+      a.x * b.y - a.y * b.x,
+    );
+  }
+  static Scale(vector, scalar) {
+    return new Vector3(
+      vector.x * scalar,
+      vector.y * scalar,
+      vector.z * scalar,
+    );
+  }
+  static Normalize(vector) {
+    return new Vector3(
+      vector.x / vector.magnitude,
+      vector.y / vector.magnitude,
+      vector.z / vector.magnitude,
+    );
+  }
+  static ApplyMatrix4(vector, matrix) {
+    return vector.clone().applyMatrix4(matrix);
+  }
+  static ApplyQuaternion(vector, quaternion) {
+    return vector.clone().applyQuaternion(quaternion);
+  }
+  
+  // Accessors
+  get isVector3() {
     return true;
   }
   get onchange() {
     return this._onchange;
   }
-  set onchange(func) {
-    if (typeof func === 'function') {
-      this._onchange = func;
-    } else throw new Error(
-      `SATURN.Vector3: .set onchange() expected 'func' to be of type 'function'.`);
+  set onchange(callback) {
+    this._onchange = callback;
   }
-  get x() { // => number
+  get x() {
     return this._x;
   }
-  set x(value) { // => number
+  set x(value) {
     this._x = value;
     this._onchange();
   }
-  get y() { // => number
+  get y() {
     return this._y;
   }
-  set y(value) { // => number
+  set y(value) {
     this._y = value;
     this._onchange();
   }
-  get z() { // => number
+  get z() {
     return this._z;
   }
-  set z(value) { // => number
+  set z(value) {
     this._z = value;
     this._onchange();
   }
-  get magnitude() { // => number
+  get magnitude() {
     return Math.sqrt(
       this._y ** 2 +
       this._x ** 2 +
       this._z ** 2
     );
   }
-  get magnitudeSq() {
+  get magnitudeSquared() {
     return (
       this._y ** 2 +
       this._x ** 2 +
       this._z ** 2
     );
   }
+  
+  // Static Accessors
+  static get Zero() {
+    return new Vector3(0, 0, 0);
+  }
+  static get X() {
+    return new Vector3(1, 0, 0);
+  }
+  static get Y() {
+    return new Vector3(0, 1, 0);
+  }
+  static get Z() {
+    return new Vector3(0, 0, 1);
+  }
 }
-
-export { Vector3 };
