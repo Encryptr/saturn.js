@@ -1,33 +1,17 @@
-import { generateKey } from './misc.js';
-import * as Constants from './constants.js';
+import {
+  RepeatWrapping,
+  LinearMipmapLinearFilter,
+  LinearFilter,
+} from './constants.js';
 
-const validWrapModes = [
-  Constants.RepeatWrapping,
-  Constants.ClampToEdgeWrapping,
-  Constants.MirroredRepeatWrapping,
-];
-const validMinFilters = [
-  Constants.NearestFilter,
-  Constants.LinearFilter,
-  Constants.NearestMipmapNearestFilter,
-  Constants.LinearMipmapNearestFilter,
-  Constants.NearestMipmapLinearFilter,
-  Constants.LinearMipmapLinearFilter,
-];
-
-const validMagFilters = [
-  Constants.NearestFilter,
-  Constants.LinearFilter,
-];
-
-class Texture {
+export class Texture {
   constructor(image) {
     this._image = image;
-    this._id = generateKey();
-    this._wrapS = Constants.RepeatWrapping;
-    this._wrapT = Constants.RepeatWrapping;
-    this._minFilter = Constants.LinearMipmapLinearFilter;
-    this._magFilter = Constants.LinearFilter;
+    this._id = Symbol();
+    this._wrapS = RepeatWrapping;
+    this._wrapT = RepeatWrapping;
+    this._minFilter = LinearMipmapLinearFilter;
+    this._magFilter = LinearFilter;
   }
   get isTexture() {
     return true;
@@ -42,46 +26,28 @@ class Texture {
     return this._wrapS;
   }
   set wrapS(mode) {
-    if (validWrapModes.includes(mode)) {
-      this._wrapS = mode;
-      this._id = generateKey();
-    } else {
-      console.warn('Texture.js: (.set wrapS) invalid wrapping mode.');
-    }
+    this._wrapS = mode;
+    this._id = Symbol();
   }
   get wrapT() {
     return this._wrapT;
   }
   set wrapT(mode) {
-    if (validWrapModes.includes(mode)) {
-      this._wrapT = mode;
-      this._id = generateKey();
-    } else {
-      console.warn('Texture.js: (.set wrapT) invalid wrapping mode.');
-    }
+    this._wrapT = mode;
+    this._id = Symbol();
   }
   get minFilter() {
     return this._minFilter;
   }
   set minFilter(mode) {
-    if (validMinFilters.includes(mode)) {
-      this._minFilter = mode;
-      this._id = generateKey();
-    } else {
-      console.warn('Texture.js: (.set minFilter) invalid filtering mode.');
-    }
+    this._minFilter = mode;
+    this._id = Symbol();
   }
   get magFilter() {
     return this._magFilter;
   }
   set magFilter(mode) {
-    if (validMagFilters.includes(mode)) {
-      this._magFilter = mode;
-      this._id = generateKey();
-    } else {
-      console.warn('Texture.js: (.set magFilter) invalid filtering mode.');
-    }
+    this._magFilter = mode;
+    this._id = Symbol();
   }
 }
-
-export { Texture };

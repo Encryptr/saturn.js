@@ -1,13 +1,7 @@
 import { Texture } from './Texture.js';
 import { Cache } from './Cache.js';
 
-const loadImage = url => new Promise(resolve => {
-  const image = new Image();
-  image.addEventListener('load', () => resolve(image));
-  image.src = url;
-});
-
-class TextureLoader {
+export class TextureLoader {
   constructor() {
     this._cache = new Cache();
   }
@@ -24,4 +18,10 @@ class TextureLoader {
   }
 }
 
-export { TextureLoader };
+function loadImage(url) {
+  return new Promise(resolve => {
+    const image = new Image();
+    image.addEventListener('load', () => resolve(image));
+    image.src = url;
+  });
+}

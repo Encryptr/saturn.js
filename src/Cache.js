@@ -1,9 +1,9 @@
-class Cache {
+export class Cache {
   constructor() {
     this._internal = {};
   }
   get(name) {
-    return this._internal[name] || false;
+    return this._internal[name];
   }
   set(name, value) {
     this._internal[name] = value;
@@ -12,5 +12,3 @@ class Cache {
     this._internal = {};
   }
 }
-
-export { Cache };

@@ -1,12 +1,16 @@
-import { generateKey } from './misc.js';
+import { Color } from './Color.js';
 
-class Material {
-  constructor() {
-    this._id = generateKey();
+export class Material {
+  constructor({
+    color = new Color(),
+    texture = null,
+  } = {}) {
+    this._id = Symbol();
     this._vertexShader = '';
     this._fragmentShader = '';
     this._uniforms = [];
-    this._customUniforms = {};
+    this._color = color;
+    this._texture = texture;
   }
   get isMaterial() {
     return true;
@@ -17,20 +21,22 @@ class Material {
   get vertexShader() {
     return this._vertexShader;
   }
-  set vertexShader(text) {
-    this._vertexShader = text;
-    this._id = generateKey();
-  }
   get fragmentShader() {
     return this._fragmentShader;
-  }
-  set fragmentShader(text) {
-    this._fragmentShader = text;
-    this._id = generateKey();
   }
   get uniforms() {
     return [...this._uniforms];
   }
+  get color() {
+    return this._color;
+  }
+  set color(color) {
+    this._color = color;
+  }
+  get texture() {
+    return this._texture;
+  }
+  set texture(texture) {
+    this._texture = texture;
+  }
 }
-
-export { Material };

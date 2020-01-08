@@ -2,8 +2,13 @@ import { Light } from './Light.js';
 import { Color } from './Color.js';
 import { Vector3 } from './math/Vector3.js';
 
-class SpotLight extends Light {
-  constructor(color = new Color(255, 255, 255), intensity = 1, direction = new Vector3(0, 0, -1), limit = 0) {
+export class SpotLight extends Light {
+  constructor({
+    color = new Color(255, 255, 255),
+    intensity = 1,
+    direction = new Vector3(0, 0, -1),
+    limit = 0,
+  }) {
     super(color, intensity);
     this._direction = direction
     this._limit = limit;
@@ -16,11 +21,7 @@ class SpotLight extends Light {
     return this._direction;
   }
   set direction(vector) {
-    if (vector.isVector3) {
-      this._direction = vector;
-    } else {
-      console.warn('SpotLight.js: (.set direction) expected vector to be of type SATURN.Vector3.');
-    }
+    this._direction = vector;
   }
   get limit() {
     return this._limit;
@@ -29,5 +30,3 @@ class SpotLight extends Light {
     this._limit = value;
   }
 }
-
-export { SpotLight };

@@ -1,8 +1,5 @@
-import { Sphere } from './math/Sphere.js';
 import { Cache } from './Cache.js';
-
-// utility variables
-const _sphere = new Sphere();
+import { clamp } from './misc.js';
 
 // utility class for caching
 class ProgramInfo {
@@ -35,6 +32,7 @@ const LIGHTS_BINDING_INDEX = 1;
 const MATRICES_BYTE_LENGTH = 128;
 const LIGHTS_BYTE_LENGTH = 3600;
 
+// main export
 export class WebGL2Renderer {
   constructor(domElement = document.createElement('canvas')) {
     this._domElement = domElement;
@@ -42,7 +40,7 @@ export class WebGL2Renderer {
     // GL setup
     this._gl = domElement.getContext('webgl2');
     if (!this._gl)
-      throw new Error('SATURN.WebGL2Renderer: .constructor() could not initialize WebGL2RenderingContext.');
+      throw new Error('SATURN.WebGL2Renderer: .constructor() could not initialize a  WebGL2RenderingContext.');
     
     this._gl.enable(this._gl.CULL_FACE);
     this._gl.enable(this._gl.DEPTH_TEST);
@@ -163,10 +161,12 @@ export class WebGL2Renderer {
       uniforms[name] = this._gl.getUniformLocation(program, name);
       
     // link UBOs to program
-    const matricesIndex = this._gl.getUniformBlockIndex(program, 'Matrices');
-    this._gl.uniformBlockBinding(program, MATRICES_BINDING_INDEX, matricesIndex);
-    const lightsIndex = this._gl.getUniformBlockIndex(program, 'Lights');
-    this._gl.uniformBlockBinding(program, LIGHTS_BINDING_INDEX, lightsIndex);
+    if (material.isLambertMaterial || material.isPhongMaterial) {
+      const matricesIndex = this._gl.getUniformBlockIndex(program, 'Matrices');
+      this._gl.uniformBlockBinding(program, MATRICES_BINDING_INDEX, matricesIndex);
+      const lightsIndex = this._gl.getUniformBlockIndex(program, 'Lights');
+      this._gl.uniformBlockBinding(program, LIGHTS_BINDING_INDEX, lightsIndex);
+    }
     
     const info = new ProgramInfo(program, uniforms);
     this._programInfoCache.set(material.id, info);
@@ -210,7 +210,7 @@ export class WebGL2Renderer {
     for (let i = 0; i < dirLights.length; i++) {
       light = dirLights[i];
       this._dirLightsView.set([
-        ...light.color.toArrayNormalized(), light.intensity, // 16 bytes
+        ...light.color.toArray(true), light.intensity, // 16 bytes
         ...light.direction, 0,                               // 16 bytes
       ], i * FLOATS_PER_DIR_LIGHT);
     }
@@ -218,7 +218,7 @@ export class WebGL2Renderer {
     for (let i = 0; i < pointLights.length; i++) {
       light = pointLights[i];
       this._pointLightsView.set([
-        ...light.color.toArrayNormalized(), light.intensity, // 16 bytes
+        ...light.color.toArray(true), light.intensity, // 16 bytes
         ...light.position, 0,                                // 16 bytes
       ], i * FLOATS_PER_POINT_LIGHT);
     }
@@ -226,7 +226,7 @@ export class WebGL2Renderer {
     for (let i = 0; i < spotlights.length; i++) {
       light = spotlights[i];
       this._spotlightsView.set([
-        ...light.color.toArrayNormalized(), light.intensity, // 16 bytes
+        ...light.color.toArray(true), light.intensity, // 16 bytes
         ...light.direction, 0,                               // 16 bytes
         ...light.position, light.limit,                      // 16 bytes
       ], i * FLOATS_PER_SPOTLIGHT);
@@ -253,7 +253,7 @@ export class WebGL2Renderer {
     this._updateMatrixUBO(camera);
     this._updateLightsUBO(lights);
     
-    this._gl.clearColor(...scene.background.toArrayNormalized(), 1);
+    this._gl.clearColor(...scene.background.toArray(true), 1);
     this._gl.clear(this._gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
     
     // main rendering loop
@@ -272,7 +272,7 @@ export class WebGL2Renderer {
       this._gl.uniformMatrix4fv(uniforms.u_model, false, mesh.worldMatrix.toFloat32Array(this._mat4));
       
       // scene ambience
-      this._gl.uniform3fv(uniforms.u_ambientColor, scene.ambientColor.toFloat32ArrayNormalized(this._vec3));
+      this._gl.uniform3fv(uniforms.u_ambientColor, scene.ambientColor.toFloat32Array(true, this._vec3));
       this._gl.uniform1f(uniforms.u_ambientIntensity, scene.ambientIntensity);
       
       // material texture
@@ -289,7 +289,7 @@ export class WebGL2Renderer {
       // shininess and specular color
       if (material.isPhongMaterial) {
         this._gl.uniform1f(uniforms.u_shininess, material.shininess);
-        this._gl.uniform3fv(uniforms.u_specularColor, material.specularColor.toFloat32ArrayNormalized(this._vec3));
+        this._gl.uniform3fv(uniforms.u_specularColor, material.specularColor.toFloat32Array(true, this._vec3));
       }
       
       this._gl.drawElements(this._gl.TRIANGLES, geometry.count, this._gl.UNSIGNED_SHORT, 0);
@@ -353,7 +353,7 @@ function createTexture(gl, texture) {
     gl.RGBA,             // internal format
     gl.RGBA,             // format
     gl.UNSIGNED_BYTE,    // type
-    texture.image, // data
+    texture.image,       // data
   );
   gl.generateMipmap(gl.TEXTURE_2D);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl[texture.wrapS.description]);

@@ -19,21 +19,13 @@ class Scene extends RenderObject {
     return this._background;
   }
   set background(color) {
-    if (color.isColor) {
-      this._background = color;
-    } else {
-      console.warn('Scene.js: (.set background) expected color to be of type SATURN.Color.');
-    }
+    this._background = color;
   }
   get ambientColor() {
     return this._ambientColor;
   }
   set ambientColor(color) {
-    if (color.isColor) {
-      this._ambientColor = color;
-    } else {
-      console.warn('Scene.js: (.set ambientColor) expected color to be of type SATURN.Color.');
-    }
+    this._ambientColor = color;
   }
   get ambientIntensity() {
     return this._ambientIntensity;

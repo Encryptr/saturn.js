@@ -1,7 +1,7 @@
 import { Color } from './Color.js';
 import { clamp } from './misc.js';
 
-class Fog {
+export class Fog {
   constructor(color = new Color(), density = 0) {
     this._color = color;
     this._density = clamp(density, 0, 1);
@@ -13,11 +13,7 @@ class Fog {
     return this._color;
   }
   set color(color) {
-    if (color.isColor) {
-      this._color = color;
-    } else {
-      console.warn('Fog.js: (.set color) expected color to be of type SATURN.Color.');
-    }
+    this._color = color;
   }
   get density() {
     return this._density;
@@ -26,5 +22,3 @@ class Fog {
     this._density = clamp(number, 0, 1);
   }
 }
-
-export { Fog };

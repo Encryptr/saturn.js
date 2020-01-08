@@ -1,19 +1,14 @@
 import { Vector3 } from './math/Vector3.js';
 import { Matrix4 } from './math/Matrix4.js';
-import { Euler } from './math/Euler.js';
 import { Quaternion } from './math/Quaternion.js';
-import { XYZ } from './constants.js';
 
-const _xAxis = new Vector3(1, 0, 0);
-const _yAxis = new Vector3(0, 1, 0);
-const _zAxis = new Vector3(0, 0, 1);
-const _q1 = new Quaternion(0, 0, 0, 1);
+let _xAxis = new Vector3(1, 0, 0);
+let _yAxis = new Vector3(0, 1, 0);
+let _zAxis = new Vector3(0, 0, 1);
+let _q1 = new Quaternion(0, 0, 0, 1);
 
-class RenderObject {
+export class RenderObject {
   constructor() {
-    const onchange = () => this.computeMatrices();
-    
-    // matrices
     this._position = new Vector3(0, 0, 0);
     this._quaternion = new Quaternion(0, 0, 0, 1);
     this._scale = new Vector3(1, 1, 1);
@@ -28,55 +23,33 @@ class RenderObject {
     // scenegraph
     this._parent = null;
     this._children = [];
-    
-    this._frustumCulled = true;
   }
   get isRenderObject() {
     return true;
   }
-  get frustumCulled() {
-    return this._frustumCulled;
-  }
-  set frustumCulled(boolean) {
-    this._frustumCulled = boolean;
-  }
-  
-  // matrices
   get position() {
     return this._position;
   }
   set position(vector) {
-    if (vector.isVector3) {
-      this._position = vector;
-      this._position.onchange = () => this.computeMatrices();
-      this._position.onchange();
-    } else {
-      console.warn('RenderObject.js: (.set position) expected vector to be of type SATURN.Vector3.');
-    }
+    this._position = vector;
+    this._position.onchange = () => this.computeMatrices();
+    this._position.onchange();
   }
   get quaternion() {
     return this._quaternion;
   }
-  set quaternion(quat) {
-    if (quaternion.isQuaternion) {
-      this._quaternion = quat;
-      this._quaternion.onchange = () => this.computeMatrices();
-      this._quaternion.onchange();
-    } else {
-      console.warn('RenderObject.js: (.set quaternion) expected quat to be of type SATURN.Quaternion.');
-    }
+  set quaternion(quaternion) {
+    this._quaternion = quaternion;
+    this._quaternion.onchange = () => this.computeMatrices();
+    this._quaternion.onchange();
   }
   get scale() {
     return this._scale;
   }
   set scale(vector) {
-    if (vector.isVector3) {
-      this._scale = vector;
-      this._scale.onchange = () => this.computeMatrices();
-      this._scale.onchange();
-    } else {
-      console.warn('RenderObject.js: (.set scale) expected vector to be of type SATURN.Vector3.');
-    }
+    this._scale = vector;
+    this._scale.onchange = () => this.computeMatrices();
+    this._scale.onchange();
   }
   get localMatrix() {
     return this._localMatrix;
@@ -85,10 +58,10 @@ class RenderObject {
     return this._worldMatrix;
   }
   computeLocalMatrix() {
-    this._localMatrix.setIdentity().multiply(
-      new Matrix4().setFromTranslation(...this._position),
-      new Matrix4().setFromQuaternion(this._quaternion),
-      new Matrix4().setFromScale(...this._scale),
+    this._localMatrix = Matrix4.Multiply(
+      Matrix4.Translation(...this._position),
+      Matrix4.FromQuaternion(this._quaternion),
+      Matrix4.Scale(...this._scale),
     );
     return this;
   }
@@ -96,135 +69,119 @@ class RenderObject {
     if (this._parent === null) {
       this._worldMatrix.copy(this._localMatrix);
     } else {
-      this._worldMatrix.setIdentity().multiply(
+      this._worldMatrix = Matrix4.Multiply(
         this._parent.worldMatrix, this._localMatrix,
       );
     }
-    this._children.forEach(o => o.computeWorldMatrix());
+    this._children.forEach(child => child.computeWorldMatrix());
     return this;
   }
   computeMatrices() {
     this.computeLocalMatrix();
     this.computeWorldMatrix();
   }
-  
-  rotateOnAxis(axis, t) {
-    if (axis.isVector3) {
-      _q1.setFromAxisAngle(axis, t);
-      this._quaternion.multiply(_q1);
-    } else {
-      console.warn('RenderObject.js: (.rotateOnAxis) expected axis to be of type SATURN.Vector3');
-    }
-  }
-  rotateOnWorldAxis(axis, t) {
-    if (axis.isVector3) {
-      _q1.setFromAxisAngle(axis, t);
-      this._quaternion.premultiply(_q1);
-    } else {
-      console.warn('RenderObject.js: (.rotateOnWorldAxis) expected axis to be of type SATURN.Vector3');
-    }
-  }
-  
-  rotateX(t) {
-    _q1.setFromAxisAngle(_xAxis, t);
+  rotateOnAxis(axis, angle) {
+    _q1.setFromAxisAngle(axis, angle);
     this._quaternion.multiply(_q1);
     return this;
   }
-  rotateY(t) {
-    _q1.setFromAxisAngle(_yAxis, t);
+  rotateOnWorldAxis(axis, angle) {
+    _q1.setFromAxisAngle(axis, angle);
+    this._quaternion.premultiply(_q1);
+    return this;
+  }
+  rotateX(angle) {
+    _q1.setFromAxisAngle(_xAxis, angle);
     this._quaternion.multiply(_q1);
     return this;
   }
-  rotateZ(t) {
-    _q1.setFromAxisAngle(_zAxis, t);
+  rotateY(angle) {
+    _q1.setFromAxisAngle(_yAxis, angle);
     this._quaternion.multiply(_q1);
     return this;
   }
-  rotateXYZ(x, y, z) {
-    this
-      .rotateX(x)
+  rotateZ(angle) {
+    _q1.setFromAxisAngle(_zAxis, angle);
+    this._quaternion.multiply(_q1);
+    return this;
+  }
+  rotateXYZ(x = 0, y = 0, z = 0) {
+    this.rotateX(x)
       .rotateY(y)
       .rotateZ(z);
     return this;
   }
-  
-  translateX(x) {
+  translateX(number) {
+    this._position.x += number;
+    return this;
+  }
+  translateY(number) {
+    this._position.y += number;
+    return this;
+  }
+  translateZ(number) {
+    this._position.z += number;
+    return this;
+  }
+  translateXYZ(x = 0, y = 0, z = 0) {
     this._position.x += x;
-    return this;
-  }
-  translateY(y) {
     this._position.y += y;
-    return this;
-  }
-  translateZ(z) {
     this._position.z += z;
     return this;
   }
-  translateXYZ(x, y, z) {
-    this
-      .translateX(x)
-      .translateY(y)
-      .translateZ(z);
+  scaleX(number) {
+    this._scale.x *= Math.abs(number);
     return this;
   }
-  
-  scaleX(s) {
-    this._scale.x *= s;
+  scaleY(number) {
+    this._scale.y *= Math.abs(number);
     return this;
   }
-  scaleY(s) {
-    this._scale.y *= s;
+  scaleZ(number) {
+    this._scale.z *= Math.abs(number);
     return this;
   }
-  scaleZ(s) {
-    this._scale.z *= s;
+  scaleXYZ(x = 1, y = 1, z = 1) {
+    this._scale.x *= Math.abs(x);
+    this._scale.y *= Math.abs(y);
+    this._scale.z *= Math.abs(z);
     return this;
   }
-  scaleXYZ(x, y, z) {
-    this
-      .scaleX(x)
-      .scaleY(y)
-      .scaleZ(z);
+  scaleUniformly(scalar) {
+    this._scale.x *= Math.abs(scalar);
+    this._scale.y *= Math.abs(scalar);
+    this._scale.z *= Math.abs(scalar);
     return this;
   }
-  
-  // scenegraph
   get parent() {
     return this._parent;
   }
-  set parent(object) {
-    if (object === null || object.isRenderObject) {
-      this._parent = object;
-    } else {
-      console.warn('RenderObject.js: (.set parent) expected object to be of type SATURN.RenderObject.');
-    }
+  set parent(objectOrNull) {
+    this._parent = objectOrNull;
   }
   get children() {
     return [...this._children];
   }
   get ancestors() {
-    return (function getChildren(a) {
-      const objects = [];
-      a.forEach(o => {
-        objects.push(o);
-        if (o.children.length > 0) {
-          objects.push(...getChildren(o.children));
+    return (function getChildren(object) {
+      const children = [];
+      object.children.forEach(child => {
+        children.push(child);
+        if (child.children.length > 0) {
+          objects.push(...getChildren(child));
         }
       });
-      return objects;
-    }(this._children));
+      return children;
+    }(this));
   }
   add(object) {
-    if (object.isRenderObject) {
-      if (object.parent)
-        object.parent.remove(object);
-      this._children.push(object);
-      object.parent = this;
-      object.computeWorldMatrix();
-      return this;
-    } else {
-      console.warn('RenderObject.js: (.add) expected object to be of type SATURN.RenderObject.');
+    if (object.parent) {
+      object.parent.remove(object);
     }
+    this._children.push(object);
+    object.parent = this;
+    object.computeWorldMatrix();
+    return this;
   }
   remove(object) {
     const index = this._children.indexOf(object);
@@ -242,5 +199,3 @@ class RenderObject {
     this.ancestors.forEach(callback);
   }
 }
-
-export { RenderObject };

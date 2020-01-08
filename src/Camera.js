@@ -1,13 +1,13 @@
 import { Matrix4 } from './math/Matrix4.js';
-import { Frustum } from './math/Frustum.js';
 import { RenderObject } from './RenderObject.js';
 
-class Camera extends RenderObject {
+export class Camera extends RenderObject {
   constructor() {
     super();
-    this._projectionMatrix = new Matrix4();
-    this._frustum = new Frustum().setFromProjectionMatrix(this._projectionMatrix);
+    this._projectionMatrix = Matrix4.Identity;
   }
+  
+  // Accessors
   get isCamera() {
     return true;
   }
@@ -17,21 +17,38 @@ class Camera extends RenderObject {
   get projectionMatrix() {
     return this._projectionMatrix;
   }
-  get frustum() {
-    return this._frustum;
-  }
 }
 
-class PerspectiveCamera extends Camera {
+export class PerspectiveCamera extends Camera {
   constructor(fov, aspect, near, far) {
     super();
-    this._projectionMatrix.makePerspective(fov, aspect, near, far);
-    this._frustum.setFromProjectionMatrix(this._projectionMatrix);
+    this._projectionMatrix = Matrix4.Perspective(fov, aspect, near, far);
   }
+  
+  // Methods
   updateProjectionMatrix(fov, aspect, near, far) {
-    this._projectionMatrix.makePerspective(fov, aspect, near, far);
-    this._frustum.setFromProjectionMatrix(this._projectionMatrix);
+    this._projectionMatrix = Matrix4.Perspective(fov, aspect, near, far);
+  }
+  
+  // Accessors
+  get isPerspectiveCamera() {
+    return true;
   }
 }
 
-export { Camera, PerspectiveCamera };
+export class OrthographicCamera extends Camera {
+  constructor(left, right, bottom, top, near, far) {
+    super();
+    this._projectionMatrix = Matrix4.Orthographic(left, right, bottom, top, near, far);
+  }
+  
+  // Methods
+  updateProjectionMatrix(left, right, bottom, top, near, far) {
+    this._projectionMatrix = Matrix4.Orthographic(left, right, bottom, top, near, far);
+  }
+  
+  // Accessors
+  get isOrthographicCamera() {
+    return true;
+  }
+}

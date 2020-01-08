@@ -1,12 +1,9 @@
-class Attribute {
+export class Attribute {
   constructor(array, itemSize, normalized, dynamic) {
-    this._array = null;
-    
+    this._array = array;
     this._itemSize = itemSize;
     this._normalized = normalized;
     this._dynamic = dynamic;
-    
-    this.array = array;
   }
   get isAttribute() {
     return true;
@@ -15,15 +12,7 @@ class Attribute {
     return this._array;
   }
   set array(array) {
-    if (ArrayBuffer.isView(array)) {
-      if (array.length % this._itemSize === 0) {
-        this._array = array;
-      } else {
-        console.warn(`Attribute.js: (.set array) expected array.length to be a multiple of ${this._itemSize}.`);
-      }
-    } else {
-      console.warn('Attribute.js: (.set array) expected array to be of type TypedArray.');
-    }
+    this._array = array;
   }
   get itemSize() {
     return this._itemSize;
@@ -41,5 +30,3 @@ class Attribute {
     this._dynamic = boolean;
   }
 }
-
-export { Attribute };
