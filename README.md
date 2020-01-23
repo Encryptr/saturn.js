@@ -6,6 +6,4 @@ The next version of Saturn will provide a more cohesive API, as well as introduc
 
 ## Images
 
-<div style="display:flex; align-items:center; justify-content:center;">
-  <img src="./preview.png" alt="Preview Image" style="border-radius:20px;"/>
-</div>
+<img src="./helmet-screenshot.png" alt="Preview Image"/>
