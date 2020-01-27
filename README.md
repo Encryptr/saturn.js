@@ -7,3 +7,4 @@ The next version of Saturn will provide a more cohesive API, as well as introduc
 ## Images
 
 <img src="./helmet-screenshot.png" alt="Preview Image"/>
+<img src="./shadowmapping.png" alt="Preview Image"/>
